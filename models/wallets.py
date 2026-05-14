@@ -1,6 +1,6 @@
 from typing import Dict
 from sqlalchemy import Column, BigInteger, SmallInteger, DateTime, DECIMAL, desc, UniqueConstraint
- serums import Session
+from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 from database.db import Base, get_laravel_datetime
 
