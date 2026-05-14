@@ -1,0 +1,96 @@
+from typing import Dict
+from sqlalchemy import Column, String, BigInteger, SmallInteger, Text, Date, DateTime, DECIMAL, desc
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
+from database.db import Base, get_laravel_datetime
+
+
+class Project(Base):
+    __tablename__ = "projects"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    currency_id = Column(BigInteger, nullable=False)
+    name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    start_date = Column(Date, nullable=True)
+    end_date = Column(Date, nullable=True)
+    total_fee = Column(DECIMAL(15, 2), nullable=True)
+    status = Column(SmallInteger, default=1) # 1=active, 0=inactive/draft
+    created_by = Column(BigInteger, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
+
+
+def create_project(db: Session, currency_id: int, name: str, created_by: int, total_fee: float = 0.0, description: str = None, status: int = 1, commit: bool = False):
+    project = Project(
+        currency_id=currency_id,
+        name=name,
+        description=description,
+        total_fee=total_fee,
+        status=status,
+        created_by=created_by,
+        created_at=get_laravel_datetime(),
+        updated_at=get_laravel_datetime()
+    )
+    db.add(project)
+    if not commit:
+        db.flush()
+    else:
+        db.commit()
+        db.refresh(project)
+    return project
+
+
+def update_project(db: Session, id: int = 0, values: Dict = {}, commit: bool = False):
+    values['updated_at'] = get_laravel_datetime()
+    db.query(Project).filter_by(id=id).update(values)
+    if not commit:
+        db.flush()
+    else:
+        db.commit()
+    return True
+
+
+def delete_project(db: Session, id: int = 0, commit: bool = False):
+    values = {
+        'updated_at': get_laravel_datetime(),
+        'deleted_at': get_laravel_datetime(),
+    }
+    db.query(Project).filter_by(id=id).update(values)
+    if not commit:
+        db.flush()
+    else:
+        db.commit()
+    return True
+
+
+def force_delete_project(db: Session, id: int = 0, commit: bool = False):
+    db.query(Project).filter_by(id=id).delete()
+    if not commit:
+        db.flush()
+    else:
+        db.commit()
+    return True
+
+
+def get_single_project_by_id(db: Session, id: int = 0):
+    return db.query(Project).filter_by(id=id).first()
+
+
+def get_projects(db: Session, filters: Dict = {}):
+    query = db.query(Project).filter(Project.deleted_at == None)
+    
+    if 'created_by' in filters:
+        query = query.filter_by(created_by=filters['created_by'])
+        
+    if 'currency_id' in filters:
+        query = query.filter_by(currency_id=filters['currency_id'])
+        
+    if 'status' in filters:
+        query = query.filter_by(status=filters['status'])
+        
+    if 'name' in filters:
+        query = query.filter(Project.name.ilike(f"%{filters['name']}%"))
+        
+    return query.order_by(desc(Project.created_at))

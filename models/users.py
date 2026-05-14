@@ -1,0 +1,110 @@
+from typing import Dict
+from sqlalchemy import Column, String, BigInteger, SmallInteger, DateTime, CheckConstraint, desc
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
+from database.db import Base, get_laravel_datetime
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    username = Column(String(80), nullable=False, unique=True)
+    phone_number = Column(String(20), unique=True, nullable=True)
+    email = Column(String(255), nullable=False, unique=True)
+    password = Column(String(255), nullable=False)
+    pin = Column(String(255), nullable=False)
+    user_type = Column(SmallInteger, nullable=False, default=1) # 1=public, 2=staff
+    status = Column(SmallInteger, default=1) # 1=active, 0=inactive
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
+
+
+
+def create_user(db: Session, username: str, email: str, password: str, pin: str = None, phone_number: str = None, user_type: int = 1, status: int = 1, commit: bool = False):
+    user = User(
+        username=username,
+        email=email,
+        password=password,
+        pin=pin,
+        phone_number=phone_number,
+        user_type=user_type,
+        status=status,
+        created_at=get_laravel_datetime(),
+        updated_at=get_laravel_datetime()
+    )
+    db.add(user)
+    if commit == False:
+        db.flush()
+    else:
+        db.commit()
+        db.refresh(user)
+    return user
+
+
+def update_user(db: Session, id: int = 0, values: Dict = {}, commit: bool = False):
+    values['updated_at'] = get_laravel_datetime()
+    db.query(User).filter_by(id=id).update(values)
+    if commit == False:
+        db.flush()
+    else:
+        db.commit()
+    return True
+
+
+def delete_user(db: Session, id: int = 0, commit: bool = False):
+    values = {
+        'updated_at': get_laravel_datetime(),
+        'deleted_at': get_laravel_datetime(),
+    }
+    db.query(User).filter_by(id=id).update(values)
+    if commit == False:
+        db.flush()
+    else:
+        db.commit()
+    return True
+
+
+def force_delete_user(db: Session, id: int = 0, commit: bool = False):
+    db.query(User).filter_by(id=id).delete()
+    if commit == False:
+        db.flush()
+    else:
+        db.commit()
+    return True
+
+
+def get_single_user_by_id(db: Session, id: int = 0):
+    return db.query(User).filter_by(id=id).first()
+
+
+def get_single_user_by_email(db: Session, email: str):
+    return db.query(User).filter_by(email=email, deleted_at=None).first()
+
+
+def get_single_user_by_username(db: Session, username: str):
+    return db.query(User).filter_by(username=username, deleted_at=None).first()
+
+def get_single_user_by_phone_number(db: Session, phone_number: str):
+    return db.query(User).filter_by(phone_number=phone_number, deleted_at=None).first()
+
+def get_users(db: Session, filters: Dict = {}):
+    query = db.query(User).filter(User.deleted_at == None)
+    
+    if 'username' in filters:
+        query = query.filter(User.username.ilike(f"%{filters['username']}%"))
+        
+    if 'phone_number' in filters:
+        query = query.filter(User.phone_number.ilike(f"%{filters['phone_number']}%"))
+         
+    if 'email' in filters:
+        query = query.filter(User.email.ilike(f"%{filters['email']}%"))
+        
+    if 'user_type' in filters:
+        query = query.filter_by(user_type=filters['user_type'])
+        
+    if 'status' in filters:
+        query = query.filter_by(status=filters['status'])
+        
+    return query.order_by(desc(User.created_at))
