@@ -18,7 +18,7 @@ from models.roles_users import Role_User, create_role_user, update_role_user, de
 from models.staffs import Staff, create_staff, update_staff, delete_staff, force_delete_staff, get_single_staff_by_id, get_staff_by_user_id, get_staffs
 from models.testimonies import Testimony, create_testimony, update_testimony, delete_testimony, force_delete_testimony, get_single_testimony_by_id, get_approved_testimonies, get_testimonies
 from models.transactions import Transaction, create_transaction, update_transaction, delete_transaction, force_delete_transaction, get_single_transaction_by_id, get_transaction_by_reference, get_user_transaction_history, get_transactions
-from models.users import users, User, create_user, update_user, delete_user, force_delete_user, get_single_user_by_id, get_single_user_by_email, get_single_user_by_username, get_single_user_by_phone_number, get_users
+from models.users import User, create_user, update_user, delete_user, force_delete_user, get_single_user_by_id, get_single_user_by_email, get_single_user_by_username, get_single_user_by_phone_number, get_users
 from models.wallets import Wallet, create_wallet, update_wallet, delete_wallet, force_delete_wallet, get_single_wallet_by_id, get_wallet_by_user_id, get_wallet_by_project_id, get_wallets
 import string
 import random
