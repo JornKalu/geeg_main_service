@@ -84,7 +84,7 @@ def get_single_profile_by_id(db: Session, id: int = 0):
     return db.query(Profile).filter_by(id=id).first()
 
 
-def get_profile_by_user_id(db: Session, user_id: int):
+def get_single_profile_by_user_id(db: Session, user_id: int):
     """
     Retrieves the profile for a specific user.
     """
