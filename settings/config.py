@@ -18,5 +18,14 @@ def load_env_config():
         'secret_key': os.getenv("ACCESS_SECRET_KEY"),
         'password_salt': os.getenv("ACCESS_SALT"),
         'algorithm': os.getenv('ALGORITHM'),
+        'cloudinary_cloud_name': os.getenv('CLOUDINARY_NAME'),
+        'cloudinary_api_key': os.getenv('CLOUDINARY_KEY'),
+        'cloudinary_api_secret': os.getenv('CLOUDINARY_SECRET'),
+        'smtp2go_url': os.getenv('SMTP2GO_URL'),
+        'smtp2go_key': os.getenv('SMTP2GO_KEY'),
+        'smtp2go_name': os.getenv('SMTP2GO_NAME'),
+        'smtp2go_address': os.getenv('SMTP2GO_ADDRESS'),
+        'geocode_url': os.getenv('GEOCODE_URL'),
+        'geocode_key': os.getenv('GEOCODE_KEY'),
     }
 
