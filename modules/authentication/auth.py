@@ -1,5 +1,5 @@
 from typing import Dict
-from database.model import update_user, get_single_user_by_id, get_single_profile_by_user_id, get_single_user_by_email, get_single_staff_by_user_id, create_user_with_relevant_rows, registration_unique_field_check, create_token, update_token, get_single_token_by_id, get_tokens, get_tokens_by_user_id, get_latest_user_token, update_token_by_user_id, update_token_by_user_id_and_token_type, update_token_email, get_latest_user_token_by_type, get_latest_user_token_by_type_and_status, get_latest_user_token_by_email_and_status, get_country_by_code, get_wallet_by_user_id
+from database.model import update_user, get_single_user_by_id, get_single_profile_by_user_id, get_single_user_by_email, create_user_with_relevant_rows, registration_unique_field_check, get_country_by_code, get_wallet_by_user_id
 from modules.utils.net import get_ip_info, process_phone_number, validate_email_advanced
 from modules.utils.tools import process_schema_dictionary
 from modules.utils.auth import AuthHandler, get_next_few_minutes, check_if_time_as_pass_now
