@@ -2,7 +2,8 @@ from typing import Dict, List
 import jwt 
 from fastapi import HTTPException, Security, Depends, status, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from passlib.context import CryptContext 
+from passlib.context import CryptContext
+from pwdlib import PasswordHash
 from datetime import datetime, timedelta, UTC, timezone
 import dateparser
 import time
@@ -37,17 +38,20 @@ def check_if_time_as_pass_now(time_str: str = None):
 class AuthHandler():
     security = HTTPBearer()
     # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
-    secret = config['secret_key']
+    # pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
+    # secret = config['secret_key']
+    password_hash = PasswordHash.recommended()
 
     def get_password_hash(self, password: str = None):
         # print(f"Password length (chars): {len(password)}")
         # print(f"Password length (bytes): {len(password.encode('utf-8'))}")
         # print(f"Password repr: {repr(password)}")
-        return self.pwd_context.hash(password)
+        # return self.pwd_context.hash(password)
+        return self.password_hash.hash(password)
     
     def verify_password(self, plain_password: str=None, hashed_password: str=None):
-        return self.pwd_context.verify(plain_password, hashed_password)
+        # return self.pwd_context.verify(plain_password, hashed_password)
+        return self.password_hash.verify(plain_password, hashed_password)
 
     def encode_token(self, db: Session, user: Dict={}):
         payload = {
