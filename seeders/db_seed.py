@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from seeders.user_seeder import run_user_seeder
+from seeders.user_seed import run_user_seeder
 from modules.utils.tools import truncate_all_tables
 import traceback
 
