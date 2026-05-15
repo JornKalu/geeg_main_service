@@ -38,7 +38,7 @@ def create_user_with_relevant_rows(db: Session, username: str=None, phone_number
         create_profile(db=db, user_id=user.id, first_name=first_name, other_name=other_name, last_name=last_name)
         create_wallet(db=db, user_id=user.id)
     else:
-        create_staff(db=db, user_id=user.id, first_name=first_name, other_name=other_name, last_name=last_name)
+        create_staff(db=db, user_id=user.id, first_name=first_name, last_name=last_name)
     return user
 
 def registration_unique_field_check(db: Session, email: str=None, username: str=None, phone_number: str=None):
