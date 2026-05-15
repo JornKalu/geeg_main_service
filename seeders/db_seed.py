@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from seeders.location_seed import run_location_seeder
 from seeders.user_seed import run_user_seeder
 # from modules.utils.tools import truncate_all_tables
 import traceback
@@ -9,11 +10,13 @@ def run_seed(db: Session):
         # if tru['status'] == False:
         #     return tru
         # else:
+        #     print(run_location_seeder(db=db))
         #     print(run_user_seeder(db=db))
         #     return {
         #         'status': True,
         #         'message': 'Seeders ran successfully!'
         #     }
+        print(run_location_seeder(db=db))
         print(run_user_seeder(db=db))
         return {
             'status': True,
