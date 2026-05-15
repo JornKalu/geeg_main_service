@@ -40,6 +40,9 @@ class AuthHandler():
     secret = config['secret_key']
 
     def get_password_hash(self, password: str = None):
+        print(f"Password length (chars): {len(password)}")
+        print(f"Password length (bytes): {len(password.encode('utf-8'))}")
+        print(f"Password repr: {repr(password)}")
         return self.pwd_context.hash(password)
     
     def verify_password(self, plain_password: str=None, hashed_password: str=None):
