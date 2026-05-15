@@ -36,7 +36,8 @@ def check_if_time_as_pass_now(time_str: str = None):
 
 class AuthHandler():
     security = HTTPBearer()
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
     secret = config['secret_key']
 
     def get_password_hash(self, password: str = None):
