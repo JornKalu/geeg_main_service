@@ -12,7 +12,7 @@ import sys, traceback
 auth = AuthHandler()
 
 
-def register_user(db: Session, username: str = None, email: str = None, phone_number: str = None, password: str = None, first_name: str = None, other_name: str = None, last_name: str = None, is_staff: int = 0):
+def register_user(db: Session, username: str = None, email: str = None, phone_number: str = None, password: str = None, first_name: str = None, last_name: str = None, is_staff: int = 0):
     country = get_country_by_code(db=db, code="NG")
     validate_email = validate_email_advanced(email=email)
     if validate_email['status'] == False:
@@ -39,7 +39,7 @@ def register_user(db: Session, username: str = None, email: str = None, phone_nu
         hashed_password = None
         if password is not None:
             hashed_password = auth.get_password_hash(password=password)      
-        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, first_name=first_name, other_name=other_name, last_name=last_name, is_staff=is_staff)
+        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, first_name=first_name, last_name=last_name, is_staff=is_staff)
         payload = {
             'id': user.id,
             'username': user.username,
@@ -69,7 +69,7 @@ def register_user(db: Session, username: str = None, email: str = None, phone_nu
             'data': data,
         }
     
-def create_just_user(db: Session, username: str = None, email: str = None, phone_number: str = None, password: str = None, first_name: str = None, other_name: str = None, last_name: str = None, is_staff: int = 0):
+def create_just_user(db: Session, username: str = None, email: str = None, phone_number: str = None, password: str = None, first_name: str = None, last_name: str = None, is_staff: int = 0):
     country = get_country_by_code(db=db, code="NG")
     validate_email = validate_email_advanced(email=email)
     if validate_email['status'] == False:
@@ -96,7 +96,7 @@ def create_just_user(db: Session, username: str = None, email: str = None, phone
         hashed_password = None
         if password is not None:
             hashed_password = auth.get_password_hash(password=password)      
-        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, first_name=first_name, other_name=other_name, last_name=last_name, is_staff=is_staff)
+        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, first_name=first_name, last_name=last_name, is_staff=is_staff)
         return {
             'status': True,
             'message': 'Login Success',

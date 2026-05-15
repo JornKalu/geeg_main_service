@@ -6,7 +6,7 @@ class ProfileModel(BaseModel):
     id: int
     user_id: int
     first_name: Optional[str] = None
-    other_name: Optional[str] = None
+    # other_name: Optional[str] = None
     last_name: Optional[str] = None
     date_of_birth: Optional[str] = None
     gender: Optional[str] = None
