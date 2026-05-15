@@ -69,6 +69,39 @@ def register_user(db: Session, username: str = None, email: str = None, phone_nu
             'data': data,
         }
     
+def create_just_user(db: Session, username: str = None, email: str = None, phone_number: str = None, password: str = None, first_name: str = None, other_name: str = None, last_name: str = None, is_staff: int = 0):
+    country = get_country_by_code(db=db, code="NG")
+    validate_email = validate_email_advanced(email=email)
+    if validate_email['status'] == False:
+        return {
+            'status': False,
+            'message': validate_email['message'],
+            'data': None
+        }
+    username = str(username).strip().replace(" ", "")
+    processed_phone_number = process_phone_number(phone_number=phone_number, country_code=country.code_one)
+    new_phone = None
+    if processed_phone_number['status'] == True:
+        new_phone = processed_phone_number['phone_number']
+    else:
+        new_phone = phone_number
+    check = registration_unique_field_check(db=db, email=email)
+    if check['status'] == False:
+        return {
+            'status': False,
+            'message': check['message'],
+            'data': None,
+        }
+    else:
+        hashed_password = None
+        if password is not None:
+            hashed_password = auth.get_password_hash(password=password)      
+        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, first_name=first_name, other_name=other_name, last_name=last_name, is_staff=is_staff)
+        return {
+            'status': True,
+            'message': 'Login Success',
+            'data': user,
+        }
 
 def login_with_email(db: Session, email: str=None, password: str=None):
     try:
