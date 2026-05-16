@@ -4,7 +4,7 @@ from datetime import datetime
 
 class ProfileModel(BaseModel):
     id: int
-    user_id: int
+    user_id: Optional[int] = None
     first_name: Optional[str] = None
     # other_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -18,9 +18,9 @@ class ProfileModel(BaseModel):
 
 class WalletModel(BaseModel):
     id: int
-    user_id: int
-    project_id: int
-    balance: float
+    user_id: Optional[int] = None
+    project_id: Optional[int] = None
+    balance: Optional[float] = None
     
     class Config:
         orm_mode = True

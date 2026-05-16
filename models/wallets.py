@@ -18,7 +18,7 @@ class Wallet(Base):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
 
-def create_wallet(db: Session, user_id: int = 0, project_id: int = 0, balance: float = 0.00, status: int = 1, commit: bool = False):
+def create_wallet(db: Session, user_id: int = None, project_id: int = None, balance: float = 0.00, status: int = 1, commit: bool = False):
     wallet = Wallet(
         user_id=user_id,
         project_id=project_id,
