@@ -28,7 +28,7 @@ class Profile(Base):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
 
-def create_profile(db: Session, user_id: int, country_id: int = None, industry_id: int = None, category_id: int = None, first_name: str = None, last_name: str = None, commit: bool = False):
+def create_profile(db: Session, user_id: int, country_id: int = 0, industry_id: int = 0, category_id: int = 0, first_name: str = None, last_name: str = None, commit: bool = False):
     profile = Profile(
         user_id=user_id,
         country_id=country_id,
