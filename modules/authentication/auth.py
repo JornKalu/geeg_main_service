@@ -39,7 +39,7 @@ def register_user(db: Session, username: str = None, email: str = None, phone_nu
         hashed_password = None
         if password is not None:
             hashed_password = auth.get_password_hash(password=password)      
-        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, first_name=first_name, last_name=last_name, is_staff=is_staff)
+        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, country_id=country.id, first_name=first_name, last_name=last_name, is_staff=is_staff)
         payload = {
             'id': user.id,
             'username': user.username,
@@ -96,7 +96,7 @@ def create_just_user(db: Session, username: str = None, email: str = None, phone
         hashed_password = None
         if password is not None:
             hashed_password = auth.get_password_hash(password=password)      
-        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, first_name=first_name, last_name=last_name, is_staff=is_staff)
+        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, country_id=country.id, first_name=first_name, last_name=last_name, is_staff=is_staff)
         return {
             'status': True,
             'message': 'Login Success',

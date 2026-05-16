@@ -29,13 +29,13 @@ from database.db import get_laravel_datetime
 def id_generator(size=15, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-def create_user_with_relevant_rows(db: Session, username: str=None, phone_number: str=None, email: str = None, password: str = None, first_name: str = None, last_name: str = None, is_staff: int = 0):
+def create_user_with_relevant_rows(db: Session, username: str=None, phone_number: str=None, email: str = None, password: str = None, country_id: int = None, first_name: str = None, last_name: str = None, is_staff: int = 0):
     user_type = 1
     if is_staff == 1:
         user_type = 2
     user = create_user(db=db, email=email, username=username, phone_number=phone_number, password=password, user_type=user_type, status=1)
     if is_staff == 0:
-        create_profile(db=db, user_id=user.id, first_name=first_name, last_name=last_name)
+        create_profile(db=db, user_id=user.id, country_id=country_id, first_name=first_name, last_name=last_name)
         create_wallet(db=db, user_id=user.id)
     else:
         create_staff(db=db, user_id=user.id, first_name=first_name, last_name=last_name)
