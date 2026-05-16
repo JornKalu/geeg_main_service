@@ -14,7 +14,7 @@ async def register(request: Request, fields: RegisterRequest, db: Session = Depe
     req = register_user(db=db, email=fields.email, password=fields.password, first_name=fields.first_name, other_name=fields.other_name, last_name=fields.last_name, is_staff=fields.is_staff)
     return req
 
-@router.post("/login")
+@router.post("/login", response_model=MainAuthResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def login(request: Request, fields: LoginEmailRequest, db: Session = Depends(get_db)):
     req = login_with_email(db=db, email=fields.email, password=fields.password)
     return req
