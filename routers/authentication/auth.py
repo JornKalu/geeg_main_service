@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Depends, HTTPException
 from database.db import get_session, get_db
 from sqlalchemy.orm import Session
 from modules.authentication.auth import auth, register_user, login_with_email, get_user_details, update_user_pin, verify_user_pin, check_if_email_exists
-from database.schema import ErrorResponse, PlainResponse, PlainCodeResponse, PlainResponseData, RegisterRequest, LoginEmailRequest, UserPinModel, MainAuthResponseModel, MainUserDetailsResponseModel, CheckUserResponseModel, CheckEmailRequest
+from database.schema import ErrorResponse, PlainResponse, PlainCodeResponse, PlainResponseData, RegisterRequest, LoginEmailRequest, UserPinModel, MainAuthResponseModel, MainUserDetailsResponseModel, CheckUserResponseModel, CheckEmailRequest, FinalisePasswordLessRequest, SendEmailTokenRequest, VerifyEmailTokenRequest
 
 router = APIRouter(
     prefix="/auth",
