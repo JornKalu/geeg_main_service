@@ -20,25 +20,25 @@ class LoginEmailRequest(BaseModel):
     class Config:
         orm_mode = True
 
-# class FinalisePasswordLessRequest(BaseModel):
-#     email: str
-#     token_str: str
+class FinalisePasswordLessRequest(BaseModel):
+    email: str
+    token_str: str
     
-#     class Config:
-#         orm_mode = True
+    class Config:
+        orm_mode = True
 
-# class SendEmailTokenRequest(BaseModel):
-#     email: str
+class SendEmailTokenRequest(BaseModel):
+    email: str
     
-#     class Config:
-#         orm_mode = True
+    class Config:
+        orm_mode = True
 
-# class VerifyEmailTokenRequest(BaseModel):
-#     email: str
-#     token_str: str
+class VerifyEmailTokenRequest(BaseModel):
+    email: str
+    token_str: str
     
-#     class Config:
-#         orm_mode = True
+    class Config:
+        orm_mode = True
 
 class CheckEmailRequest(BaseModel):
     email: str

@@ -19,30 +19,30 @@ async def login(request: Request, fields: LoginEmailRequest, db: Session = Depen
     req = login_with_email(db=db, email=fields.email, password=fields.password)
     return req
 
-# @router.post("/finalize_passwordless_login", response_model=MainAuthResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
-# async def login_finalize_passwordless(request: Request, fields: FinalisePasswordLessRequest, db: Session = Depends(get_db)):
-#     req = finalise_passwordless_login(db=db, email=fields.email, token_str=fields.token_str, fbt=fields.fbt)
-#     return req
+@router.post("/finalize_passwordless_login", response_model=MainAuthResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+async def login_finalize_passwordless(request: Request, fields: FinalisePasswordLessRequest, db: Session = Depends(get_db)):
+    req = finalise_passwordless_login(db=db, email=fields.email, token_str=fields.token_str, fbt=fields.fbt)
+    return req
 
-# @router.post("/send_token_email", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
-# async def send_token_email(request: Request, fields: SendEmailTokenRequest, db: Session = Depends(get_db)):
-#     req = send_email_token(db=db, email=fields.email)
-#     return req
+@router.post("/send_token_email", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+async def send_token_email(request: Request, fields: SendEmailTokenRequest, db: Session = Depends(get_db)):
+    req = send_email_token(db=db, email=fields.email)
+    return req
 
-# @router.post("/send_user_token_email", response_model=PlainCodeResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
-# async def send_user_token_email(request: Request, fields: SendEmailTokenRequest, db: Session = Depends(get_db)):
-#     req = send_user_email_token(db=db, email=fields.email)
-#     return req
+@router.post("/send_user_token_email", response_model=PlainCodeResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+async def send_user_token_email(request: Request, fields: SendEmailTokenRequest, db: Session = Depends(get_db)):
+    req = send_user_email_token(db=db, email=fields.email)
+    return req
 
-# @router.post("/verify_token_email", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
-# async def verify_token_email(request: Request, fields: VerifyEmailTokenRequest, db: Session = Depends(get_db)):
-#     req = verify_email_token(db=db, email=fields.email, token_str=fields.token_str)
-#     return req
+@router.post("/verify_token_email", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+async def verify_token_email(request: Request, fields: VerifyEmailTokenRequest, db: Session = Depends(get_db)):
+    req = verify_email_token(db=db, email=fields.email, token_str=fields.token_str)
+    return req
 
-# @router.post("/verify_just_email_token", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
-# async def verify_just_email_token(request: Request, fields: VerifyEmailTokenRequest, db: Session = Depends(get_db)):
-#     req = email_token_just_verify(db=db, email=fields.email, token_str=fields.token_str)
-#     return req
+@router.post("/verify_just_email_token", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+async def verify_just_email_token(request: Request, fields: VerifyEmailTokenRequest, db: Session = Depends(get_db)):
+    req = email_token_just_verify(db=db, email=fields.email, token_str=fields.token_str)
+    return req
 
 @router.get("/details", response_model=MainUserDetailsResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def details(request: Request, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
