@@ -57,6 +57,14 @@ def update_profile(db: Session, id: int = 0, values: Dict = {}, commit: bool = F
         db.commit()
     return True
 
+def update_profile_by_user_id(db: Session, user_id: int=0, values: Dict={}, commit: bool=False):
+    values['updated_at'] = get_laravel_datetime()
+    db.query(Profile).filter_by(user_id = user_id).update(values)
+    if commit == False:
+        db.flush()
+    else:
+        db.commit()
+    return True
 
 def delete_profile(db: Session, id: int = 0, commit: bool = False):
     values = {

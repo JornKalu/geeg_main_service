@@ -26,7 +26,7 @@ def upload_request_file_to_cloudinary(file: UploadFile):
             }
         upload_result = cloudinary.uploader.upload(
             file.file,
-            folder="upteek",
+            folder="geeg",
             quality="auto:best",        # Automatically optimize quality, prioritize lossless compression
             # fetch_format="auto",        # Automatically choose the best format for the file
             # flags="lossless"            # Ensure lossless compression
@@ -57,7 +57,7 @@ def upload_base64_to_cloudinary(base64_string: str=None):
         upload_result = cloudinary.uploader.upload(
             image_bytes,
             resource_type="image",
-            folder="upteek",
+            folder="geeg",
         )
         uploaded_url = upload_result['secure_url']
         public_id = upload_result['public_id']
