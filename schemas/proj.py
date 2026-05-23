@@ -1,7 +1,7 @@
 from typing import Optional, List, Dict
 from pydantic import BaseModel
 from datetime import datetime
-.user import UserMainModel, WalletModel, WalletCurrencyModel
+from .user import UserMainModel, WalletModel, WalletCurrencyModel
 
 class RoleUserModel(BaseModel):
 	id: int
