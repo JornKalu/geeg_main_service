@@ -23,7 +23,7 @@ class RoleModel(BaseModel):
 	fee: Optional[float] = None
 	status: Optional[int] = None
 	role_users: Optional[RoleUserModel] = None
-    created_at: Optional[datetime] = None
+	created_at: Optional[datetime] = None
 
 	class Config:
 		orm_mode = True
@@ -40,7 +40,7 @@ class MilestoneModel(BaseModel):
 	status: Optional[int] = None
 	assigned_to: Optional[int] = None
 	created_by: Optional[int] = None
-    created_at: Optional[datetime] = None
+	created_at: Optional[datetime] = None
 
 	class Config:
 		orm_mode = True
@@ -55,10 +55,10 @@ class ProjectModel(BaseModel):
 	total_fee: Optional[float] = None
 	status: Optional[int] = None
 	created_by: Optional[int] = None
-    created_at: Optional[datetime] = None
-    currency: Optional[WalletCurrencyModel] = None
-    wallet: Optional[WalletModel] = None
-    milestones: Optional[List[MilestoneModel]] = None
+	created_at: Optional[datetime] = None
+	currency: Optional[WalletCurrencyModel] = None
+	wallet: Optional[WalletModel] = None
+	milestones: Optional[List[MilestoneModel]] = None
 
 	class Config:
 		orm_mode = True
