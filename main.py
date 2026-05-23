@@ -16,16 +16,18 @@ sys.path.append(BASEDIR)
 #system routes
 from routers import test
 from routers import seed
+from routers.miscellaneous import globe
 from routers.authentication import auth
 from routers.user import pro
 
 # Main app section here
 app = FastAPI(title="Geeg Main API Service")
 
-app.include_router(test.router)
-app.include_router(seed.router)
+app.include_router(globe.router)
 app.include_router(auth.router)
 app.include_router(pro.router)
+app.include_router(test.router)
+app.include_router(seed.router)
 
 
 async def catch_exceptions_middleware(request: Request, call_next):

@@ -57,7 +57,8 @@ class AuthHandler():
         payload = {
             'exp': datetime.utcnow() + timedelta(days=365),
             'iat': datetime.utcnow(),
-            'sub': json.dumps(user['id'])
+            'sub': str(user['id'])
+            # 'sub': json.dumps(user['id'])
         }
         expired_at = (datetime.utcnow() + timedelta(days=365)).strftime("%Y/%m/%d %H:%M:%S")
         token = jwt.encode(payload, self.secret, algorithm="HS256")
@@ -70,8 +71,9 @@ class AuthHandler():
             if isinstance(token, bytes):
                 token = token.decode('utf-8')
             payload = jwt.decode(token, self.secret, algorithms=["HS256"])
-            sub_data = json.loads(payload['sub'])
-            user_id = sub_data['id']
+            # sub_data = json.loads(payload['sub'])
+            # user_id = sub_data['id']
+            user_id = int(payload['sub'])
 
             user = get_single_user_by_id(db=db, id=user_id)
             if user is None:

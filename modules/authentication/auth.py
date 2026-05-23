@@ -29,7 +29,7 @@ def register_user(db: Session, username: str = None, email: str = None, phone_nu
         new_phone = processed_phone_number['phone_number']
     else:
         new_phone = phone_number
-    check = registration_unique_field_check(db=db, email=email)
+    check = registration_unique_field_check(db=db, email=email, username=username, phone_number=phone_number)
     if check['status'] == False:
         return {
             'status': False,

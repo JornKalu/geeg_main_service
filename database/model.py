@@ -10,6 +10,7 @@ from models.general_settings import General_Setting, create_general_setting, upd
 from models.industries import Industry, create_industry, update_industry, delete_industry, force_delete_industry, get_single_industry_by_id, get_single_industry_by_name, get_industries
 from models.invites import Invite, create_invite, update_invite, delete_invite, force_delete_invite, get_single_invite_by_id, get_invites, get_invite_by_email_and_project
 from models.invoices import Invoice, create_invoice, update_invoice, delete_invoice, force_delete_invoice, get_single_invoice_by_id, get_invoice_by_reference, get_invoices
+from models.milestones import Milestone, create_milestone, update_milestone, delete_milestone, force_delete_milestone, get_single_milestone_by_id, get_project_milestones, get_milestones
 from models.password_resets import Password_Reset, create_password_reset, update_password_reset, delete_password_reset, force_delete_password_reset, get_single_password_reset_by_id, get_password_reset_by_token, get_password_resets
 from models.profiles import Profile, create_profile, update_profile, update_profile_by_user_id, delete_profile, force_delete_profile, get_single_profile_by_id, get_single_profile_by_user_id, get_profiles
 from models.projects import Project, create_project, update_project, delete_project, force_delete_project, get_single_project_by_id, get_projects
