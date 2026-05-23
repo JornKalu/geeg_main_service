@@ -2,6 +2,7 @@ from typing import Dict
 from sqlalchemy import Column, BigInteger, SmallInteger, DateTime, DECIMAL, desc, UniqueConstraint
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
+from sqlalchemy.sql.schema import ForeignKey
 from database.db import Base, get_laravel_datetime
 
 
@@ -9,17 +10,24 @@ class Wallet(Base):
     __tablename__ = "wallets"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    user_id = Column(BigInteger, nullable=True, unique=True)
-    project_id = Column(BigInteger, nullable=True, unique=True)
+    currency_id = Column(BigInteger, ForeignKey("currencies.id"), unique=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), unique=True)
+    project_id = Column(BigInteger, ForeignKey("projects.id"), unique=True)
     balance = Column(DECIMAL(15, 2), default=0.00)
     status = Column(SmallInteger, default=1) # 1=active, 0=frozen/blocked
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
+    currency = relationship(
+        "Currency",
+        back_populates="wallets"
+    )
 
-def create_wallet(db: Session, user_id: int = None, project_id: int = None, balance: float = 0.00, status: int = 1, commit: bool = False):
+
+def create_wallet(db: Session, currency_id: int = None, user_id: int = None, project_id: int = None, balance: float = 0.00, status: int = 1, commit: bool = False):
     wallet = Wallet(
+        currency_id=currency_id,
         user_id=user_id,
         project_id=project_id,
         balance=balance,

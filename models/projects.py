@@ -1,7 +1,8 @@
 from typing import Dict
 from sqlalchemy import Column, String, BigInteger, SmallInteger, Text, Date, DateTime, DECIMAL, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload, relationship
 from sqlalchemy.sql import func
+from sqlalchemy.sql.schema import ForeignKey
 from database.db import Base, get_laravel_datetime
 
 
@@ -9,7 +10,7 @@ class Project(Base):
     __tablename__ = "projects"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    currency_id = Column(BigInteger, nullable=False)
+    currency_id = Column(BigInteger, ForeignKey("currencies.id"), nullable=False)
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     start_date = Column(Date, nullable=True)
@@ -20,6 +21,26 @@ class Project(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
+
+    milestones = relationship(
+        "Milestone", 
+        uselist=True, 
+        primaryjoin="Project.id == Milestone.project_id",
+        order_by="Milestone.rank",
+        lazy="selectin"
+    )
+
+    currency = relationship(
+        "Currency",
+        back_populates="projects"
+    )
+
+    wallet = relationship(
+        "Wallet", 
+        uselist=False, 
+        primaryjoin="Project.id == Wallet.project_id",
+        lazy="selectin"
+    )
 
 
 def create_project(db: Session, currency_id: int, name: str, created_by: int, total_fee: float = 0.0, description: str = None, status: int = 1, commit: bool = False):
@@ -75,17 +96,30 @@ def force_delete_project(db: Session, id: int = 0, commit: bool = False):
 
 
 def get_single_project_by_id(db: Session, id: int = 0):
+    return db.query(Project).options(
+        selectinload(Project.currency),
+        selectinload(Project.wallet),
+        selectinload(Project.milestones),
+    ).filter_by(id=id).first()
+
+def get_just_single_project_by_id(db: Session, id: int = 0):
     return db.query(Project).filter_by(id=id).first()
 
-
 def get_projects(db: Session, filters: Dict = {}):
-    query = db.query(Project).filter(Project.deleted_at == None)
+    query = db.query(Project).options(
+        selectinload(Project.currency),
+        selectinload(Project.wallet),
+        selectinload(Project.milestones),
+    ).filter(Project.deleted_at == None)
     
     if 'created_by' in filters:
         query = query.filter_by(created_by=filters['created_by'])
         
     if 'currency_id' in filters:
         query = query.filter_by(currency_id=filters['currency_id'])
+        
+    if 'ids' in filters:
+        query = query.filter(Project.id.in_(filters['ids']))
         
     if 'status' in filters:
         query = query.filter_by(status=filters['status'])

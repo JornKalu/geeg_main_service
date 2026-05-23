@@ -1,7 +1,8 @@
 from typing import Dict
 from sqlalchemy import Column, BigInteger, SmallInteger, DateTime, desc, UniqueConstraint
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload, relationship
 from sqlalchemy.sql import func
+from sqlalchemy.sql.schema import ForeignKey
 from database.db import Base, get_laravel_datetime
 
 
@@ -9,8 +10,8 @@ class Role_User(Base):
     __tablename__ = "roles_users"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    role_id = Column(BigInteger, nullable=False)
-    user_id = Column(BigInteger, nullable=False)
+    role_id = Column(BigInteger, ForeignKey("roles.id"), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
     invite_id = Column(BigInteger, nullable=True)
     status = Column(SmallInteger, default=1) # 1=active, 0=inactive/suspended
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -19,6 +20,16 @@ class Role_User(Base):
 
     __table_args__ = (
         UniqueConstraint('role_id', 'user_id', name='uq_role_user'),
+    )
+
+    role = relationship(
+        "Role",
+        back_populates="roles_users"
+    )
+
+    user = relationship(
+        "User",
+        back_populates="roles_users"
     )
 
 
@@ -96,8 +107,12 @@ def check_user_has_role(db: Session, user_id: int, role_id: int):
     """
     Checks if a user is already assigned to a specific role.
     """
-    return db.query(Role_User).filter_by(
-        user_id=user_id, 
-        role_id=role_id, 
-        deleted_at=None
-    ).first()
+    return db.query(
+        db.query(Role_User.id)
+        .filter(
+            Role_User.user_id == user_id,
+            Role_User.role_id == role_id,
+            Role_User.deleted_at.is_(None)
+        )
+        .exists()
+    ).scalar()

@@ -1,6 +1,6 @@
 from typing import Dict
 from sqlalchemy import Column, String, BigInteger, SmallInteger, DateTime, CheckConstraint, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload, relationship
 from sqlalchemy.sql import func
 from database.db import Base, get_laravel_datetime
 
@@ -20,7 +20,26 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
+    profile = relationship(
+        "Profile", 
+        uselist=False, 
+        primaryjoin="User.id == Profile.user_id",
+        lazy="selectin"
+    )
 
+    wallet = relationship(
+        "Wallet", 
+        uselist=False, 
+        primaryjoin="User.id == Wallet.user_id",
+        lazy="selectin"
+    )
+
+    role_users = relationship(
+        "Role_User",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin"
+    )
 
 def create_user(db: Session, username: str, email: str, password: str, pin: str = None, phone_number: str = None, user_type: int = 1, status: int = 1, commit: bool = False):
     user = User(

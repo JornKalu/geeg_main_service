@@ -13,8 +13,8 @@ from models.invoices import Invoice, create_invoice, update_invoice, delete_invo
 from models.milestones import Milestone, create_milestone, update_milestone, delete_milestone, force_delete_milestone, get_single_milestone_by_id, get_project_milestones, get_milestones
 from models.password_resets import Password_Reset, create_password_reset, update_password_reset, delete_password_reset, force_delete_password_reset, get_single_password_reset_by_id, get_password_reset_by_token, get_password_resets
 from models.profiles import Profile, create_profile, update_profile, update_profile_by_user_id, delete_profile, force_delete_profile, get_single_profile_by_id, get_single_profile_by_user_id, get_profiles
-from models.projects import Project, create_project, update_project, delete_project, force_delete_project, get_single_project_by_id, get_projects
-from models.roles import Role, create_role, update_role, delete_role, force_delete_role, get_single_role_by_id, get_roles_by_project, get_roles
+from models.projects import Project, create_project, update_project, delete_project, force_delete_project, get_single_project_by_id, get_just_single_project_by_id, get_projects
+from models.roles import Role, create_role, update_role, delete_role, force_delete_role, get_single_role_by_id, get_just_single_role_by_id, get_roles_by_project, get_roles
 from models.roles_users import Role_User, create_role_user, update_role_user, delete_role_user, force_delete_role_user, get_single_role_user_by_id, get_roles_users, check_user_has_role
 from models.staffs import Staff, create_staff, update_staff, delete_staff, force_delete_staff, get_single_staff_by_id, get_staff_by_user_id, get_staffs
 from models.testimonies import Testimony, create_testimony, update_testimony, delete_testimony, force_delete_testimony, get_single_testimony_by_id, get_approved_testimonies, get_testimonies
@@ -31,14 +31,14 @@ from database.db import get_laravel_datetime
 def id_generator(size=15, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-def create_user_with_relevant_rows(db: Session, username: str=None, phone_number: str=None, email: str = None, password: str = None, country_id: int = None, first_name: str = None, last_name: str = None, is_staff: int = 0):
+def create_user_with_relevant_rows(db: Session, username: str=None, phone_number: str=None, email: str = None, password: str = None, country_id: int = None, currency_id: int = None, first_name: str = None, last_name: str = None, is_staff: int = 0):
     user_type = 1
     if is_staff == 1:
         user_type = 2
     user = create_user(db=db, email=email, username=username, phone_number=phone_number, password=password, user_type=user_type, status=1)
     if is_staff == 0:
         create_profile(db=db, user_id=user.id, country_id=country_id, first_name=first_name, last_name=last_name)
-        create_wallet(db=db, user_id=user.id)
+        create_wallet(db=db, currency_id=currency_id, user_id=user.id)
     else:
         create_staff(db=db, user_id=user.id, first_name=first_name, last_name=last_name)
     return user

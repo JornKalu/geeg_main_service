@@ -1,5 +1,5 @@
 from typing import Dict
-from database.model import update_user, get_single_user_by_id, get_single_profile_by_user_id, get_single_user_by_email, create_user_with_relevant_rows, registration_unique_field_check, get_country_by_code, get_wallet_by_user_id, create_token, update_token, get_single_token_by_id, get_tokens, get_tokens_by_user_id, get_latest_user_token, update_token_by_user_id, update_token_by_user_id_and_token_type, update_token_email, get_latest_user_token_by_type, get_latest_user_token_by_type_and_status, get_latest_user_token_by_email_and_status
+from database.model import update_user, get_single_user_by_id, get_single_profile_by_user_id, get_single_user_by_email, create_user_with_relevant_rows, registration_unique_field_check, get_country_by_code, get_wallet_by_user_id, create_token, update_token, get_single_token_by_id, get_tokens, get_tokens_by_user_id, get_latest_user_token, update_token_by_user_id, update_token_by_user_id_and_token_type, update_token_email, get_latest_user_token_by_type, get_latest_user_token_by_type_and_status, get_latest_user_token_by_email_and_status, get_currency_by_code
 from modules.utils.net import get_ip_info, process_phone_number, validate_email_advanced
 from modules.utils.tools import process_schema_dictionary
 from modules.utils.auth import AuthHandler, get_next_few_minutes, check_if_time_as_pass_now
@@ -15,6 +15,7 @@ auth = AuthHandler()
 
 def register_user(db: Session, username: str = None, email: str = None, phone_number: str = None, password: str = None, first_name: str = None, last_name: str = None, is_staff: int = 0):
     country = get_country_by_code(db=db, code="NG")
+    currency = get_currency_by_code(db=db, code="NGN")
     validate_email = validate_email_advanced(email=email)
     if validate_email['status'] == False:
         return {
@@ -40,7 +41,7 @@ def register_user(db: Session, username: str = None, email: str = None, phone_nu
         hashed_password = None
         if password is not None:
             hashed_password = auth.get_password_hash(password=password)      
-        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, country_id=country.id, first_name=first_name, last_name=last_name, is_staff=is_staff)
+        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, country_id=country.id, currency_id=currency.id, first_name=first_name, last_name=last_name, is_staff=is_staff)
         payload = {
             'id': user.id,
             'username': user.username,
@@ -72,6 +73,7 @@ def register_user(db: Session, username: str = None, email: str = None, phone_nu
     
 def create_just_user(db: Session, username: str = None, email: str = None, phone_number: str = None, password: str = None, first_name: str = None, last_name: str = None, is_staff: int = 0):
     country = get_country_by_code(db=db, code="NG")
+    currency = get_currency_by_code(db=db, code="NGN")
     validate_email = validate_email_advanced(email=email)
     if validate_email['status'] == False:
         return {
@@ -97,7 +99,7 @@ def create_just_user(db: Session, username: str = None, email: str = None, phone
         hashed_password = None
         if password is not None:
             hashed_password = auth.get_password_hash(password=password)      
-        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, country_id=country.id, first_name=first_name, last_name=last_name, is_staff=is_staff)
+        user = create_user_with_relevant_rows(db=db, phone_number=new_phone, username=username, email=email, password=hashed_password, country_id=country.id, currency_id=currency.id, first_name=first_name, last_name=last_name, is_staff=is_staff)
         return {
             'status': True,
             'message': 'Login Success',

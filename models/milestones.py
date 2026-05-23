@@ -2,6 +2,7 @@ from typing import Dict
 from sqlalchemy import Column, String, BigInteger, Integer, SmallInteger, Text, Date, TIMESTAMP, desc, asc
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
+from sqlalchemy.sql.schema import ForeignKey
 from database.db import Base, get_laravel_datetime
 
 
@@ -9,7 +10,7 @@ class Milestone(Base):
     __tablename__ = "milestones"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    project_id = Column(BigInteger, nullable=False)
+    project_id = Column(BigInteger, ForeignKey("projects.id"), nullable=False)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     rank = Column(Integer, default=0) # For ordering milestones within a project

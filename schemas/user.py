@@ -16,11 +16,26 @@ class ProfileModel(BaseModel):
     class Config:
         orm_mode = True
 
+
+class WalletCurrencyModel(BaseModel):
+    id: int
+    name: Optional[str] = None
+    symbol: Optional[str] = None
+    code: Optional[str] = None
+    status: Optional[int] = 0
+    created_at: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+
+
 class WalletModel(BaseModel):
     id: int
+    currency_id: Optional[int] = None
     user_id: Optional[int] = None
     project_id: Optional[int] = None
     balance: Optional[float] = None
+    # currency: Optional[WalletCurrencyModel] = None
     
     class Config:
         orm_mode = True

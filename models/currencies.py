@@ -1,6 +1,6 @@
 from typing import Dict
 from sqlalchemy import Column, String, BigInteger, SmallInteger, CHAR, DateTime, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload, relationship
 from sqlalchemy.sql import func
 from database.db import Base, get_laravel_datetime
 
@@ -16,6 +16,20 @@ class Currency(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
+
+    projects = relationship(
+        "Project", 
+        uselist=True, 
+        primaryjoin="Currency.id == Project.currency_id",
+        lazy="selectin"
+    )
+
+    wallets = relationship(
+        "Wallet", 
+        uselist=True, 
+        primaryjoin="Currency.id == Wallet.currency_id",
+        lazy="selectin"
+    )
 
 
 def create_currency(db: Session, name: str, symbol: str, code: str, status: int = 1, commit: bool = False):
@@ -74,7 +88,6 @@ def get_single_currency_by_id(db: Session, id: int = 0):
 
 def get_currency_by_code(db: Session, code: str):
     return db.query(Currency).filter_by(code=code, deleted_at=None).first()
-
 
 def get_currencies(db: Session, filters: Dict = {}):
     query = db.query(Currency).filter(Currency.deleted_at == None)

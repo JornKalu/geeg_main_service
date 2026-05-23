@@ -1,9 +1,11 @@
 from typing import Dict
 from sqlalchemy import Column, String, BigInteger, SmallInteger, Text, DateTime, DECIMAL, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload, relationship
 from sqlalchemy.sql import func
 from database.db import Base, get_laravel_datetime
 
+from .roles_users import Role_User
+from .users import User
 
 class Role(Base):
     __tablename__ = "roles"
@@ -18,6 +20,13 @@ class Role(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
+
+    role_users = relationship(
+        "Role_User",
+        back_populates="role",
+        cascade="all, delete-orphan",
+        lazy="selectin"
+    )
 
 
 def create_role(db: Session, project_id: int, name: str, fee: float = 0.0, description: str = None, icon: str = None, status: int = 1, commit: bool = False):
@@ -73,8 +82,10 @@ def force_delete_role(db: Session, id: int = 0, commit: bool = False):
 
 
 def get_single_role_by_id(db: Session, id: int = 0):
-    return db.query(Role).filter_by(id=id).first()
+    return db.query(Role).options(selectinload(Role.role_users).selectinload(Role_User.user).selectinload(User.profile)).filter_by(id=id).first()
 
+def get_just_single_role_by_id(db: Session, id: int = 0):
+    return db.query(Role).filter_by(id=id).first()
 
 def get_roles_by_project(db: Session, project_id: int):
     """
@@ -87,7 +98,7 @@ def get_roles_by_project(db: Session, project_id: int):
 
 
 def get_roles(db: Session, filters: Dict = {}):
-    query = db.query(Role).filter(Role.deleted_at == None)
+    query = db.query(Role).options(selectinload(Role.role_users).selectinload(Role_User.user).selectinload(User.profile)).filter(Role.deleted_at == None)
     
     if 'project_id' in filters:
         query = query.filter_by(project_id=filters['project_id'])

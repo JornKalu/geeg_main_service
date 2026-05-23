@@ -2,6 +2,7 @@ from typing import Dict
 from sqlalchemy import Column, String, BigInteger, SmallInteger, Text, Date, DateTime, CheckConstraint, desc
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
+from sqlalchemy.sql.schema import ForeignKey
 from database.db import Base, get_laravel_datetime
 
 
@@ -9,10 +10,10 @@ class Profile(Base):
     __tablename__ = "profiles"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    user_id = Column(BigInteger, nullable=False, unique=True)
-    country_id = Column(BigInteger, nullable=True)
-    industry_id = Column(BigInteger, nullable=True)
-    category_id = Column(BigInteger, nullable=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    country_id = Column(BigInteger, ForeignKey("countries.id"), nullable=True)
+    industry_id = Column(BigInteger, ForeignKey("industries.id"), nullable=True)
+    category_id = Column(BigInteger, ForeignKey("categories.id"), nullable=True)
     first_name = Column(String(100), nullable=True)
     other_name = Column(String(100), nullable=True)
     last_name = Column(String(100), nullable=True)
