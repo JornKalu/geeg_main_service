@@ -24,12 +24,12 @@ class Role_User(Base):
 
     role = relationship(
         "Role",
-        back_populates="roles_users"
+        back_populates="role_users"
     )
 
     user = relationship(
         "User",
-        back_populates="roles_users"
+        back_populates="role_users"
     )
 
 
