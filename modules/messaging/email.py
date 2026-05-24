@@ -59,7 +59,9 @@ def send_to_mailtrap(subject: str=None, recipient: str=None, recipient_name: str
             'data': None,
         }
 
-def get_notification_string(title: str=None, body: str=None, foot: str=None):
+def get_notification_string(title: str=None, sub_title: str=None, recipient_name: str=None, body: str=None, foot: str=None):
+    if recipient_name is None:
+        recipient_name = ""
     current_dir = os.path.dirname(os.path.abspath(__file__))
     base_dir = os.path.abspath(os.path.join(current_dir, "../../"))
     template_path = os.path.join(base_dir, "templates", "notifications.html")
@@ -67,24 +69,27 @@ def get_notification_string(title: str=None, body: str=None, foot: str=None):
     with open(template_path, "r", encoding="utf-8") as file:
         html = file.read()
     if html != "":
-        html = html.replace("@subject@", title)
+        html = html.replace("@title@", title)
+        html = html.replace("@sub_title@", sub_title)
+        html = html.replace("@recipient_name@", recipient_name)
         html = html.replace("@body@", body)
         html = html.replace("@foot@", foot)
     return html
 
-def send_email(subject: str=None, recipients: str=None, title: str=None, body: str=None, foot: str=None, attachments: List=[]):
+def send_email(subject: str=None, recipients: str=None, recipient_name: str=None, title: str=None, sub_title: str=None, body: str=None, foot: str=None, attachments: List=[]):
     text = str(title) + "\n" + str(body) + "\n" + str(foot)
-    html = get_notification_string(title=title, body=body, foot=foot)
+    html = get_notification_string(title=title, sub_title=sub_title, recipient_name=recipient_name, body=body, foot=foot)
     return send_to_smtp2go(subject=subject, recipients=recipients, text=text, html=html, attachments=attachments)
     # return send_to_mailtrap(subject=subject, recipient=recipients, text=text, html=html, attachments=attachments)
 
 def e_send_token(username: str=None, email: str=None, token: str=None, minutes: int=0):
     title = "New Token"
-    msg = "<p>Hello " + str(username) + ",<br><br>Use the code below to complete your action:<br><br>"+str(token)+"<br><br>The above token expires in " + str(minutes) + " minutes<br>If you didn't originate this please reach out to our support team at techsupport@upteek.com</p>"
-    footnote = "💕 & ✨, Upteek."
-    return send_email(subject=title, recipients=email, title=title, body=msg, foot=footnote)
+    sub_title = "Temporary token"
+    msg = "Use the code below to complete your action:<br><br>"+str(token)+"<br><br>The above token expires in " + str(minutes) + " minutes<br>If you didn't originate this please reach out to our support team at techsupport@geeg.com</p>"
+    footnote = "💕 & ✨, Geeg."
+    return send_email(subject=title, recipients=email, title=title, sub_title=sub_title, recipient_name=username, body=msg, foot=footnote)
 
-def e_notification(email: str=None, title: str=None, msg: str=None):
+def e_notification(email: str=None, title: str=None, sub_title: str=None, recipient_name: str=None, msg: str=None):
     msg = "<p>" + str(msg) + "</p>"
-    footnote = "💕 & ✨, Upteek."
-    return send_email(subject=title, recipients=email, title=title, body=msg, foot=footnote)
+    footnote = "💕 & ✨, Geeg."
+    return send_email(subject=title, recipients=email, title=title, sub_title=sub_title, recipient_name=recipient_name, body=msg, foot=footnote)

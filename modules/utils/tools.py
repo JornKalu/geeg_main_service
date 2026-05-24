@@ -117,6 +117,12 @@ def process_datetime_string(time_str: str = None):
     else:
         return dateparser.parse(str(time_str), date_formats=['%d-%m-%Y %H:%M:%S'])
 
+def process_date_string(date_str: str = None):
+    if date_str is None:
+        return None
+    else:
+        return dateparser.parse(str(date_str), date_formats=['%d-%m-%Y'])
+
 def process_datetime_string_to_readable(time_str: str = None):
     if time_str is None:
         return None

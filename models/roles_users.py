@@ -1,5 +1,5 @@
 from typing import Dict
-from sqlalchemy import Column, BigInteger, SmallInteger, DateTime, desc, UniqueConstraint
+from sqlalchemy import Column, BigInteger, SmallInteger, DateTime, desc, UniqueConstraint, select
 from sqlalchemy.orm import Session, joinedload, selectinload, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.schema import ForeignKey
@@ -103,6 +103,18 @@ def get_roles_users(db: Session, filters: Dict = {}):
 
 
 # --- Utility ---
+def get_role_ids_from_roles_users_by_user_id(db: Session, user_id: int=0):
+    stmt = (
+        select(Role_User.role_id)
+        .where(
+            Role_User.user_id == user_id,
+            Role_User.deleted_at.is_(None),
+            Role_User.status == 1
+        )
+    )
+    return db.execute(stmt).scalars().all()
+
+
 def check_user_has_role(db: Session, user_id: int, role_id: int):
     """
     Checks if a user is already assigned to a specific role.

@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from .user import UserMainModel, WalletModel, WalletCurrencyModel
 
@@ -67,6 +67,8 @@ class ProjectModel(BaseModel):
 class CreateProjectModel(BaseModel):
 	currency_id: int
 	name: str
+	start_date: str
+	end_date: str
 	total_fee: float
 	description: Optional[str] = None
 
@@ -152,6 +154,54 @@ class AddUserToRoleModel(BaseModel):
 	user_id: int
 	role_id: int
 	invite_id: Optional[int] = 0
+
+	class Config:
+		orm_mode = True
+
+
+class InviteModel(BaseModel):
+	id: int
+	user_id: Optional[int] = None
+	project_id: Optional[int] = None
+	role_id: Optional[int] = None
+	email: Optional[str] = None
+	full_name: Optional[str] = None
+	message: Optional[str] = None
+	status: Optional[int] = None
+	sent_by: Optional[int] = None
+	created_at: Optional[datetime] = None
+	project: Optional[ProjectModel] = None
+	role: Optional[RoleModel] = None
+
+	class Config:
+		orm_mode = True
+
+class InviteResponseModel(BaseModel):
+	status: bool
+	message: str
+	data: Optional[InviteModel] = None
+
+	class Config:
+		orm_mode = True
+
+class SendInviteModel(BaseModel):
+	project_id: int
+	role_id: int
+	email: EmailStr
+	full_name: Optional[str] = None
+	message: Optional[str] = None
+
+	class Config:
+		orm_mode = True
+
+class AcceptInviteModel(BaseModel):
+	invite_id: id
+
+	class Config:
+		orm_mode = True
+
+class RejectInviteModel(BaseModel):
+	invite_id: int
 
 	class Config:
 		orm_mode = True

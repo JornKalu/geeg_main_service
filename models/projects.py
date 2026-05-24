@@ -22,6 +22,13 @@ class Project(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
+    roles = relationship(
+        "Role", 
+        uselist=True, 
+        primaryjoin="Project.id == Role.project_id",
+        lazy="selectin"
+    )
+
     milestones = relationship(
         "Milestone", 
         uselist=True, 
@@ -42,11 +49,20 @@ class Project(Base):
         lazy="selectin"
     )
 
+    invites = relationship(
+        "Invite", 
+        uselist=True, 
+        primaryjoin="Project.id == Invite.project_id",
+        lazy="selectin"
+    )
 
-def create_project(db: Session, currency_id: int, name: str, created_by: int, total_fee: float = 0.0, description: str = None, status: int = 1, commit: bool = False):
+
+def create_project(db: Session, currency_id: int, name: str, start_date: str, end_date: str, created_by: int, total_fee: float = 0.0, description: str = None, status: int = 1, commit: bool = False):
     project = Project(
         currency_id=currency_id,
         name=name,
+        start_date=start_date,
+        end_date=end_date,
         description=description,
         total_fee=total_fee,
         status=status,

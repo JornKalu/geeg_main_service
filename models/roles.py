@@ -1,5 +1,5 @@
 from typing import Dict
-from sqlalchemy import Column, String, BigInteger, SmallInteger, Text, DateTime, DECIMAL, desc
+from sqlalchemy import Column, String, BigInteger, SmallInteger, Text, DateTime, DECIMAL, desc, select
 from sqlalchemy.orm import Session, joinedload, selectinload, relationship
 from sqlalchemy.sql import func
 from database.db import Base, get_laravel_datetime
@@ -26,6 +26,18 @@ class Role(Base):
         back_populates="role",
         cascade="all, delete-orphan",
         lazy="selectin"
+    )
+
+    invites = relationship(
+        "Invite", 
+        uselist=True, 
+        primaryjoin="Role.id == Invite.role_id",
+        lazy="selectin"
+    )
+
+    project = relationship(
+        "Project",
+        back_populates="roles"
     )
 
 
@@ -110,3 +122,14 @@ def get_roles(db: Session, filters: Dict = {}):
         query = query.filter(Role.name.ilike(f"%{filters['name']}%"))
         
     return query.order_by(desc(Role.created_at))
+
+def get_project_ids_from_roles_using_role_ids(db: Session, role_ids: list[int]):
+    stmt = (
+        select(Role.project_id.distinct())
+        .where(
+            Role.id.in_(role_ids),
+            Role.deleted_at.is_(None),   # optional soft delete check
+            Role.status == 1             # optional active check
+        )
+    )
+    return db.execute(stmt).scalars().all()

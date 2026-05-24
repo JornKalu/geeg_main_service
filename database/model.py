@@ -8,19 +8,19 @@ from models.countries_currencies import Country_Currency, create_country_currenc
 from models.currencies import Currency, create_currency, update_currency, delete_currency, force_delete_currency, get_single_currency_by_id, get_currency_by_code, get_currencies
 from models.general_settings import General_Setting, create_general_setting, update_general_setting, delete_general_setting, get_single_setting_by_id, get_setting_by_name, get_setting_value, get_general_settings
 from models.industries import Industry, create_industry, update_industry, delete_industry, force_delete_industry, get_single_industry_by_id, get_single_industry_by_name, get_industries
-from models.invites import Invite, create_invite, update_invite, delete_invite, force_delete_invite, get_single_invite_by_id, get_invites, get_invite_by_email_and_project
+from models.invites import Invite, create_invite, update_invite, delete_invite, force_delete_invite, get_single_invite_by_id, get_just_single_invite_by_id, get_invites, get_invite_by_email_and_project
 from models.invoices import Invoice, create_invoice, update_invoice, delete_invoice, force_delete_invoice, get_single_invoice_by_id, get_invoice_by_reference, get_invoices
 from models.milestones import Milestone, create_milestone, update_milestone, delete_milestone, force_delete_milestone, get_single_milestone_by_id, get_project_milestones, get_milestones
 from models.password_resets import Password_Reset, create_password_reset, update_password_reset, delete_password_reset, force_delete_password_reset, get_single_password_reset_by_id, get_password_reset_by_token, get_password_resets
 from models.profiles import Profile, create_profile, update_profile, update_profile_by_user_id, delete_profile, force_delete_profile, get_single_profile_by_id, get_single_profile_by_user_id, get_profiles
 from models.projects import Project, create_project, update_project, delete_project, force_delete_project, get_single_project_by_id, get_just_single_project_by_id, get_projects
-from models.roles import Role, create_role, update_role, delete_role, force_delete_role, get_single_role_by_id, get_just_single_role_by_id, get_roles_by_project, get_roles
-from models.roles_users import Role_User, create_role_user, update_role_user, delete_role_user, force_delete_role_user, get_single_role_user_by_id, get_roles_users, check_user_has_role
+from models.roles import Role, create_role, update_role, delete_role, force_delete_role, get_single_role_by_id, get_just_single_role_by_id, get_roles_by_project, get_roles, get_project_ids_from_roles_using_role_ids
+from models.roles_users import Role_User, create_role_user, update_role_user, delete_role_user, force_delete_role_user, get_single_role_user_by_id, get_roles_users, get_role_ids_from_roles_users_by_user_id, check_user_has_role
 from models.staffs import Staff, create_staff, update_staff, delete_staff, force_delete_staff, get_single_staff_by_id, get_staff_by_user_id, get_staffs
 from models.testimonies import Testimony, create_testimony, update_testimony, delete_testimony, force_delete_testimony, get_single_testimony_by_id, get_approved_testimonies, get_testimonies
 from models.tokens import Token, create_token, update_token, update_token_by_user_id, update_token_by_user_id_and_token_type, update_token_email, delete_token, force_delete_token, get_single_token_by_id, get_tokens, get_tokens_by_user_id, get_latest_user_token, get_latest_user_token_by_type, get_latest_user_token_by_type_and_status, get_latest_user_token_by_email_and_status, verify_active_token
 from models.transactions import Transaction, create_transaction, update_transaction, delete_transaction, force_delete_transaction, get_single_transaction_by_id, get_transaction_by_reference, get_user_transaction_history, get_transactions
-from models.users import User, create_user, update_user, delete_user, force_delete_user, get_single_user_by_id, get_single_user_by_email, get_single_user_by_username, get_single_user_by_phone_number, get_users
+from models.users import User, create_user, update_user, delete_user, force_delete_user, get_single_user_by_id, get_just_single_user_by_id, get_single_user_by_email, get_single_user_by_username, get_single_user_by_phone_number, get_users
 from models.wallets import Wallet, create_wallet, update_wallet, delete_wallet, force_delete_wallet, get_single_wallet_by_id, get_wallet_by_user_id, get_wallet_by_project_id, get_wallets
 import string
 import random

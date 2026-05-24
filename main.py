@@ -19,6 +19,7 @@ from routers import seed
 from routers.miscellaneous import globe
 from routers.authentication import auth
 from routers.user import pro
+from routers.project import man
 
 # Main app section here
 app = FastAPI(title="Geeg Main API Service")
@@ -26,6 +27,7 @@ app = FastAPI(title="Geeg Main API Service")
 app.include_router(globe.router)
 app.include_router(auth.router)
 app.include_router(pro.router)
+app.include_router(man.router)
 app.include_router(test.router)
 app.include_router(seed.router)
 

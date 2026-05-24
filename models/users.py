@@ -93,14 +93,14 @@ def force_delete_user(db: Session, id: int = 0, commit: bool = False):
         db.commit()
     return True
 
-
 def get_single_user_by_id(db: Session, id: int = 0):
     return db.query(User).filter_by(id=id).first()
 
+def get_just_single_user_by_id(db: Session, id: int = 0):
+    return db.query(User).filter_by(id=id).first()
 
 def get_single_user_by_email(db: Session, email: str):
     return db.query(User).filter_by(email=email, deleted_at=None).first()
-
 
 def get_single_user_by_username(db: Session, username: str):
     return db.query(User).filter_by(username=username, deleted_at=None).first()
