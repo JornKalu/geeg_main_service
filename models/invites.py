@@ -1,5 +1,5 @@
 from typing import Dict
-from sqlalchemy import Column, String, BigInteger, Text, DateTime, desc
+from sqlalchemy import Column, String, BigInteger, Text, DateTime, desc, SmallInteger
 from sqlalchemy.orm import Session, joinedload, selectinload, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.schema import ForeignKey
