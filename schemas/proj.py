@@ -195,7 +195,7 @@ class SendInviteModel(BaseModel):
 		orm_mode = True
 
 class AcceptInviteModel(BaseModel):
-	invite_id: id
+	invite_id: int
 
 	class Config:
 		orm_mode = True
