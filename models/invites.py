@@ -10,9 +10,9 @@ class Invite(Base):
     __tablename__ = "invites"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    user_id = Column(BigInteger, ForeignKey("user_id.id"), nullable=True) # Null if the person isn't a user yet
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=True) # Null if the person isn't a user yet
     project_id = Column(BigInteger, ForeignKey("projects.id"), nullable=False)
-    role_id = Column(BigInteger, nullable=False)
+    role_id = Column(BigInteger, ForeignKey("roles.id"), nullable=False)
     email = Column(String(255), nullable=False)
     full_name = Column(String(150), nullable=True)
     message = Column(Text, nullable=True)
