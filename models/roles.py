@@ -2,6 +2,7 @@ from typing import Dict
 from sqlalchemy import Column, String, BigInteger, SmallInteger, Text, DateTime, DECIMAL, desc, select
 from sqlalchemy.orm import Session, joinedload, selectinload, relationship
 from sqlalchemy.sql import func
+from sqlalchemy.sql.schema import ForeignKey
 from database.db import Base, get_laravel_datetime
 
 from .roles_users import Role_User
@@ -11,7 +12,7 @@ class Role(Base):
     __tablename__ = "roles"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    project_id = Column(BigInteger, nullable=False)
+    project_id = Column(BigInteger, ForeignKey("projects.id"), nullable=False)
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
     icon = Column(String(100), nullable=True)
