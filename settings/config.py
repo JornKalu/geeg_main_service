@@ -27,5 +27,7 @@ def load_env_config():
         'smtp2go_address': os.getenv('SMTP2GO_ADDRESS'),
         'geocode_url': os.getenv('GEOCODE_URL'),
         'geocode_key': os.getenv('GEOCODE_KEY'),
+        'korapay_secret_key': os.getenv('KORAPAY_SECRET_KEY'),
+        'korapay_public_key': os.getenv('KORAPAY_PUBLIC_KEY'),
+        'korapay_url': os.getenv('KORAPAY_URL', 'https://api.korapay.com/merchant/api/v1'),
     }
-

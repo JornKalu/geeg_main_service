@@ -25,12 +25,19 @@ def send_external_request(url, headers: Dict={}, data: Dict={}, type: int=1, htt
                 'data': None,
                 'status_code': 0,
             }
+
+        try:
+            resp_data = response.json()
+        except ValueError:
+            resp_data = response.text
+
         return {
             'status': True,
             'message': 'Success',
-            'data': response.json(),
+            'data': resp_data,
             'status_code': response.status_code,
         }
+
     except requests.exceptions.RequestException as e:
         return {
             'status': False,

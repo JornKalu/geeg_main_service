@@ -110,7 +110,7 @@ def update_existing_role(db: Session, user_id: int=0, id: int=0, values: Dict={}
 					'message': 'Success',
 				}
 
-def delete_existing_role(db: Session, id: int=0):
+def delete_existing_role(db: Session, id: int=0, user_id: int = 0):
 	role = get_just_single_role_by_id(db=db, id=id)
 	if role is None:
 		return {
@@ -324,7 +324,7 @@ def accept_invite(db: Session, invite_id: int=0, user_id: int=0):
 						update_invite(db=db, id=invite.id, values={'user_id': user_id, 'status': 1})
 						sub_title = f"Your invitation for the {project.name} has been accepted"
 						msg = f"{recipient_user.username} has accepted the role as {role.name} for the {project.name} project."
-						e_notification(email=email, title="Project Role Acceptance", sub_title=sub_title, recipient_name=sender_user.username, msg=msg)
+						e_notification(email=sender_user.email, title="Project Role Acceptance", sub_title=sub_title, recipient_name=sender_user.username, msg=msg)
 						return {
 							'status': True,
 							'message': 'Success',
@@ -372,14 +372,14 @@ def reject_invite(db: Session, invite_id: int=0, user_id: int=0):
 						update_invite(db=db, id=invite.id, values={'status': 2})
 						sub_title = f"Your invitation for the {project.name} has been rejected"
 						msg = f"{recipient_user.username} has rejected the role as {role.name} for the {project.name} project."
-						e_notification(email=email, title="Project Role Acceptance", sub_title=sub_title, recipient_name=sender_user.username, msg=msg)
+						e_notification(email=sender_user.email, title="Project Role Acceptance", sub_title=sub_title, recipient_name=sender_user.username, msg=msg)
 						return {
 							'status': True,
 							'message': 'Success',
 						}
 
 def delete_existing_invite(db: Session, id: int=0, user_id: int=0):
-	invite = get_just_single_invite_by_id(db=db, id=invite_id)
+	invite = get_just_single_invite_by_id(db=db, id=id)
 	if invite is None:
 		return {
 			'status': False,

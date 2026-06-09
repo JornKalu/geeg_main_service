@@ -56,7 +56,7 @@ async def roles_update(request: Request, fields: UpdateRoleModel, user=Depends(a
 
 @router.get("/roles/delete/{role_id}", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def roles_delete(request: Request, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db), role_id: int = 0):
-    return delete_existing_role(db=db, id=role_id)
+    return delete_existing_role(db=db, id=role_id, user_id=user['id'])
 
 @router.get("/roles", response_model=Page[RoleModel], responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def roles_get_all(request: Request, db: Session = Depends(get_db), user=Depends(auth.auth_wrapper), name: str = Query(None), project_id: int = Query(None), status: int = Query(None)):
