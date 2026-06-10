@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
 class WalletTransferRequest(BaseModel):
     from_user_id: int = Field(..., description="The ID of the sender")
@@ -25,3 +25,17 @@ class GenerateVirtualAccountResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class ProjectWalletTransferRequest(BaseModel):
+    project_id: int = Field(..., description="The ID of the project wallet")
+    amount: float = Field(..., gt=0, description="Amount to transfer")
+    narration: Optional[str] = Field(None, description="Optional description for the transfer")
+
+class BulkWalletTransferItem(BaseModel):
+    to_user_id: int = Field(..., description="The ID of the recipient")
+    amount: float = Field(..., gt=0, description="Amount to transfer")
+    narration: Optional[str] = Field(None, description="Optional description for the transfer")
+
+class BulkWalletTransferRequest(BaseModel):
+    from_user_id: int = Field(..., description="The ID of the sender for all transfers")
+    transfers: List[BulkWalletTransferItem] = Field(..., min_length=1, description="List of individual transfers")

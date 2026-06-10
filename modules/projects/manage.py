@@ -1,15 +1,18 @@
-from typing import Dict, List
+from typing import Dict, List, Any
 from sqlalchemy.orm import Session
 from database.model import create_project, update_project, delete_project, get_single_project_by_id, get_just_single_project_by_id, get_projects, create_wallet, create_role, update_role, delete_role, get_single_role_by_id, get_just_single_role_by_id, get_roles, create_role_user, check_user_has_role, create_milestone, update_milestone, delete_milestone, force_delete_milestone, get_single_milestone_by_id, get_milestones, create_invite, update_invite, delete_invite, get_single_invite_by_id, get_invites, get_invite_by_email_and_project, get_single_user_by_email, get_just_single_user_by_id, get_just_single_invite_by_id, get_role_ids_from_roles_users_by_user_id, get_project_ids_from_roles_using_role_ids
 from modules.utils.tools import process_schema_dictionary, process_date_string
 from modules.messaging.email import e_notification
 from fastapi_pagination.ext.sqlalchemy import paginate
 
-def insert_new_project(db: Session, currency_id: int, name: str, start_date: str, end_date: str, created_by: int, total_fee: float = 0.0, description: str = None):
+def insert_new_project(db: Session, currency_id: int, name: str, start_date: str, end_date: str, created_by: int, total_fee: float = 0.0, description: str = None, roles: List[Dict[str, Any]] = []):
 	start_date = process_date_string(date_str=start_date)
 	end_date = process_date_string(date_str=end_date)
 	project = create_project(db=db, currency_id=currency_id, name=name, start_date=start_date, end_date=end_date, created_by=created_by, total_fee=total_fee, description=description, status=1)
 	create_wallet(db=db, currency_id=currency_id, project_id=project.id, status=1)
+	if len(roles) > 0:
+		for i in range(len(roles)):
+			create_role(db=db, project_id=project.id, name=roles[i]['name'], fee=roles[i]['fee'], description=roles[i]['description'], icon=roles[i]['icon'], status=1)
 	return {
 		'status': True,
 		'message': 'Success',

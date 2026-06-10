@@ -15,7 +15,10 @@ router = APIRouter(
 
 @router.post("/create", response_model=ProjectResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def create(request: Request, fields: CreateProjectModel, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
-    req = insert_new_project(db=db, currency_id=fields.currency_id, name=fields.name, start_date=fields.start_date, end_date=fields.end_date, created_by=user['id'], total_fee=fields.total_fee, description=fields.description)
+    roles = []
+    if fields.roles != []:
+        roles = [t.model_dump() for t in fields.roles]
+    req = insert_new_project(db=db, currency_id=fields.currency_id, name=fields.name, start_date=fields.start_date, end_date=fields.end_date, created_by=user['id'], total_fee=fields.total_fee, description=fields.description, roles=roles)
     return req
 
 @router.post("/update/{project_id}", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})

@@ -64,6 +64,15 @@ class ProjectModel(BaseModel):
 		orm_mode = True
 
 
+class CreateProjectRoleModel(BaseModel):
+	name: str
+	fee: float
+	description: Optional[str] = None
+	icon: Optional[str] = None
+
+	class Config:
+		orm_mode = True
+
 class CreateProjectModel(BaseModel):
 	currency_id: int
 	name: str
@@ -71,6 +80,7 @@ class CreateProjectModel(BaseModel):
 	end_date: str
 	total_fee: float
 	description: Optional[str] = None
+	roles: Optional[List[CreateProjectRoleModel]] = []
 
 	class Config:
 		orm_mode = True
