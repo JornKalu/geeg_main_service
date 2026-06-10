@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from .user import UserMainModel, WalletModel, WalletCurrencyModel
 
@@ -80,7 +80,7 @@ class CreateProjectModel(BaseModel):
 	end_date: str
 	total_fee: float
 	description: Optional[str] = None
-	roles: Optional[List[CreateProjectRoleModel]] = []
+	roles: List[CreateProjectRoleModel] = Field(default_factory=list, description="List of roles to be created with the project")
 
 	class Config:
 		orm_mode = True
