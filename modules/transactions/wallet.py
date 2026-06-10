@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from database.model import get_wallet_by_user_id, update_wallet, create_transaction
+from database.model import get_wallet_by_user_id, update_wallet, create_transaction, get_just_single_user_by_id, get_single_profile_by_user_id
+from modules.external.korapay import create_virtual_bank_account
 from modules.utils.tools import generate_transaction_reference
 from typing import Dict, Any
 
@@ -69,3 +70,91 @@ def process_wallet_to_wallet_transfer(db: Session, from_user_id: int, to_user_id
         'message': 'Success',
         'data': transaction
     }
+
+def generate_virtual_account_number(db: Session, user_id: int):
+    user = get_just_single_user_by_id(db=db, id=user_id)
+    if user is None:
+        return {
+            'status': False,
+            'message': 'User not found',
+            'data': None,
+        }
+    profile = get_single_profile_by_user_id(db=db, user_id=user_id)
+    if profile is None:
+        return {
+            'status': False,
+            'message': 'Profile not found',
+            'data': None,
+        }
+    
+    if profile.bvn is None or profile.bvn == "":
+        return {
+            'status': False,
+            'message': 'Please add BVN',
+            'data': None
+        }
+    
+    user_wallet = get_wallet_by_user_id(db, user_id=user_id)
+    if not user_wallet:
+        return {'status': False, 'message': 'User wallet not found', 'data': None}
+    
+    if user_wallet.is_generated == 1:
+        return {'status': False, 'message': 'Account already generated', 'data': None}
+
+    bvn = profile.bvn
+    nin = profile.nin
+
+    full_name = f"{profile.first_name} {profile.last_name}"
+    account_reference = f"USER_{user_id}_VA"
+
+    customer = {
+        "name": full_name,
+        "email": user.email
+    }
+    kyc = {
+        "bvn": bvn
+    }
+    if nin:
+        kyc["nin"] = nin
+
+    # 1. Call KoraPay API to create the virtual account
+    response = create_virtual_bank_account(
+        account_reference=account_reference,
+        account_name=full_name,
+        bank_code=None,  # KoraPay assigns this automatically if not provided
+        customer=customer,
+        kyc=kyc
+    )
+
+    if not response.get('status'):
+        return {
+            'status': False,
+            'message': response.get('message', 'Failed to create virtual account'),
+            'data': response.get('data')
+        }
+
+    va_data = response.get('data', {})
+
+    # 2. Update the wallet record with the new virtual account details
+    update_wallet(db, id=user_wallet.id, values={
+        'account_name': va_data.get('account_name'),
+        'account_number': va_data.get('account_number'),
+        'bank_name': va_data.get('bank_name'),
+        'bank_code': va_data.get('bank_code'),
+        'external_reference': account_reference,
+        'is_generated': 1
+    })
+
+    return {
+        'status': True,
+        'message': 'Success',
+        'data': {
+            'account_name': va_data.get('account_name'),
+            'account_number': va_data.get('account_number'),
+            'bank_name': va_data.get('bank_name')
+        }
+    }
+
+    
+    
+    

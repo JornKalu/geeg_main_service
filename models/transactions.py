@@ -24,6 +24,9 @@ class Transaction(Base):
     fee = Column(DECIMAL(12, 2), default=0.00)
     total_amount = Column(DECIMAL(15, 2), nullable=False)
     narration = Column(Text, nullable=True)
+    external_account_name = Column(String(255), nullable=True)
+    external_account_number = Column(String(255), nullable=True)
+    external_bank_name = Column(String(255), nullable=True)
     
     # Balance Snapshots for Audit Trail
     from_wallet_previous_balance = Column(DECIMAL(15, 2), nullable=True)

@@ -20,6 +20,8 @@ class Profile(Base):
     gender = Column(String(20), nullable=True)
     date_of_birth = Column(Date, nullable=True)
     location = Column(String(255), nullable=True)
+    nin = Column(String(255), nullable=True)
+    bvn = Column(String(255), nullable=True)
     bio = Column(Text, nullable=True)
     avatar = Column(String(500), nullable=True)
     banner = Column(String(500), nullable=True)

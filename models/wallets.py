@@ -1,5 +1,5 @@
 from typing import Dict
-from sqlalchemy import Column, BigInteger, SmallInteger, DateTime, DECIMAL, desc, UniqueConstraint
+from sqlalchemy import Column, BigInteger, SmallInteger, DateTime, DECIMAL, desc, UniqueConstraint, String
 from sqlalchemy.orm import Session, joinedload, selectinload, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.schema import ForeignKey
@@ -13,7 +13,13 @@ class Wallet(Base):
     currency_id = Column(BigInteger, ForeignKey("currencies.id"), unique=True)
     user_id = Column(BigInteger, ForeignKey("users.id"), unique=True)
     project_id = Column(BigInteger, ForeignKey("projects.id"), unique=True)
+    account_name = Column(String(255), nullable=True)
+    account_number = Column(String(255), nullable=True)
+    bank_name = Column(String(255), nullable=True)
+    bank_code = Column(String(255), nullable=True)
+    external_reference = Column(String(255), nullable=True)
     balance = Column(DECIMAL(15, 2), default=0.00)
+    is_generated = Column(SmallInteger, default=0) # 1=yes, 0=no
     status = Column(SmallInteger, default=1) # 1=active, 0=frozen/blocked
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -85,6 +91,13 @@ def get_wallet_by_user_id(db: Session, user_id: int):
     Retrieves the wallet for a specific user.
     """
     return db.query(Wallet).filter_by(user_id=user_id, deleted_at=None).first()
+
+
+def get_wallet_by_account_number(db: Session, account_number: str):
+    """
+    Retrieves the wallet for a specific user.
+    """
+    return db.query(Wallet).filter_by(account_number=account_number, deleted_at=None).first()
 
 
 def get_wallet_by_project_id(db: Session, project_id: int):

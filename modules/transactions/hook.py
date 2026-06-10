@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from settings.config import load_env_config
 
-from database.model import create_transaction, get_transaction_by_reference, update_wallet, get_wallet_by_user_id
+from database.model import create_transaction, get_transaction_by_reference, update_wallet, get_wallet_by_user_id, get_wallet_by_account_number
 from modules.utils.tools import generate_transaction_reference
 from modules.messaging.email import e_notification
 
@@ -70,16 +70,38 @@ def handle_virtual_account_payment(db: Session, payment_data: Dict) -> Dict:
         korapay_reference = payment_data.get("reference")
         narration = payment_data.get("description", "Virtual account deposit")
         customer_info = payment_data.get("customer", {})
+        virtual_bank_account_details = payment_data.get("virtual_bank_account_details", {})
         
         # Idempotency check: Prevent reprocessing the same webhook
         existing_transaction = get_transaction_by_reference(db, reference=korapay_reference)
         if existing_transaction and existing_transaction.status == 'completed':
             print(f"Duplicate webhook for KoraPay reference {korapay_reference}. Already processed.")
             return {"status": "success", "message": "Duplicate event, already processed."}
+        
 
+        
         # Extract user_id from account_reference.
         # Assuming account_reference is in the format "USER_{user_id}_VA"
-        account_reference = payment_data.get("account_reference", "")
+        account_reference = None
+        account_name = None
+        account_number = None
+        bank_name = None
+
+        if virtual_bank_account_details != {}:
+            payer_bank_account = virtual_bank_account_details.get("payer_bank_account", {})
+
+            if payer_bank_account != {}:
+                account_name = payer_bank_account.get('account_name', None)
+                account_number = payer_bank_account.get('account_number', None)
+                bank_name = payer_bank_account.get('bank_name', None)
+            
+            virtual_bank_account = virtual_bank_account_details.get("virtual_bank_account", {})
+
+            if virtual_bank_account != {}:
+                account_reference = virtual_bank_account.get("account_reference", "")
+        
+
+        # account_reference = payment_data.get("account_reference", "")
         account_reference_parts = account_reference.split('_')
         if len(account_reference_parts) < 2 or not account_reference_parts[1].isdigit():
             error_msg = f"Could not parse user_id from account_reference: {account_reference}"
@@ -112,6 +134,7 @@ def handle_virtual_account_payment(db: Session, payment_data: Dict) -> Dict:
         new_balance = prev_balance + amount
         update_wallet(db, id=user_wallet.id, values={'balance': new_balance}, commit=False)
 
+
         internal_reference = generate_transaction_reference(tran_type="deposit")
         transaction_data = {
             'to_user_id': user_id,
@@ -124,6 +147,9 @@ def handle_virtual_account_payment(db: Session, payment_data: Dict) -> Dict:
             'status': 'completed',
             'provider': 'korapay',
             'external_reference': korapay_reference,
+            'external_account_name': account_name,
+            'external_account_number': account_number,
+            'external_bank_name': bank_name,
             'meta_data': payment_data
         }
         create_transaction(db=db, transaction_type='deposit', reference=internal_reference, amount=amount, total_amount=amount, values=transaction_data, commit=True)
