@@ -79,6 +79,10 @@ def get_single_bank_account_by_id(db: Session, id: int = 0):
     return db.query(Bank_Account).filter_by(id=id).first()
 
 
+def get_just_single_bank_account_by_id(db: Session, id: int = 0):
+    return db.query(Bank_Account).filter_by(id=id).first()
+
+
 def get_bank_accounts_by_user(db: Session, user_id: int):
     """
     Fetches all bank accounts for a specific user.

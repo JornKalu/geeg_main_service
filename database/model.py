@@ -1,7 +1,7 @@
 from typing import Dict
 from sqlalchemy.orm import Session
 from models.activities import Activity, create_activity, update_activity, delete_activity, force_delete_activity, get_single_activity_by_id, get_activities_by_user, get_activities
-from models.bank_accounts import Bank_Account, create_bank_account, update_bank_account, delete_bank_account, force_delete_bank_account, get_single_bank_account_by_id, get_bank_accounts_by_user, set_default_bank_account, get_bank_accounts
+from models.bank_accounts import Bank_Account, create_bank_account, update_bank_account, delete_bank_account, force_delete_bank_account, get_single_bank_account_by_id, get_just_single_bank_account_by_id, get_bank_accounts_by_user, set_default_bank_account, get_bank_accounts
 from models.categories import Category, create_category, update_category, delete_category, force_delete_category, get_single_category_by_id, get_categories_by_industry_id, get_categories
 from models.countries import Country, create_country, update_country, delete_country, force_delete_country, get_single_country_by_id, get_country_by_code, get_countries
 from models.countries_currencies import Country_Currency, create_country_currency, update_country_currency, delete_country_currency, force_delete_country_currency, get_single_country_currency_by_id, get_country_currencies, check_country_currency_exists
