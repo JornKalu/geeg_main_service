@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
+from decimal import Decimal
 
 class WalletTransferRequest(BaseModel):
     from_user_id: int = Field(..., description="The ID of the sender")
@@ -15,6 +16,46 @@ class VirtualAccountResponseDetails(BaseModel):
     account_name: str
     account_number: str
     bank_name: str
+
+    class Config:
+        orm_mode = True
+
+class TransactionModel(BaseModel):
+    id: int
+    from_user_id: Optional[int] = None
+    to_user_id: Optional[int] = None
+    from_wallet_id: Optional[int] = None
+    to_wallet_id: Optional[int] = None
+    invoice_id: Optional[int] = None
+    bank_account_id: Optional[int] = None
+    provider: Optional[str] = None
+    transaction_type: str
+    reference: str
+    external_reference: Optional[str] = None
+    amount: Decimal
+    fee: Optional[Decimal] = None
+    total_amount: Decimal
+    narration: Optional[str] = None
+    external_account_name: Optional[str] = None
+    external_account_number: Optional[str] = None
+    external_bank_name: Optional[str] = None
+    from_wallet_previous_balance: Optional[Decimal] = None
+    from_wallet_new_balance: Optional[Decimal] = None
+    to_wallet_previous_balance: Optional[Decimal] = None
+    to_wallet_new_balance: Optional[Decimal] = None
+    status: str
+    meta_data: Optional[dict] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+
+class WithdrawalResponse(BaseModel):
+    status: bool
+    message: str
+    data: Optional[TransactionModel] = None
 
     class Config:
         orm_mode = True
@@ -80,6 +121,14 @@ class KoraResolveAccountResponse(BaseModel):
     status: bool
     message: str
     data: Optional[KoraResolveAccountData] = None
+
+    class Config:
+        orm_mode = True
+
+class WithdrawalRequest(BaseModel):
+    bank_account_id: int = Field(..., description="The ID of the saved bank account to transfer to")
+    amount: float = Field(..., gt=0, description="Amount to transfer")
+    narration: Optional[str] = Field(None, description="Optional description for the transfer")
 
     class Config:
         orm_mode = True

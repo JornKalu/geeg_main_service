@@ -75,18 +75,24 @@ def create_virtual_bank_account(
 
     return send_external_request(url=url, headers=get_korapay_headers(), data=data, type=2)
 
-def payout_bank_transfer(amount: float, reference: str, destination: Dict, narration: str = ""):
+def payout_bank_transfer(amount: float, reference: str, bank_code: str, account_number: str, narration: str = ""):
     """
     Initiate a payout to a bank account.
-    Reference: https://developers.korapay.com/reference/single-payout
+    Reference: https://developers.korapay.com/docs/payout-via-api
     """
-    url = f"{config['korapay_url']}/transfers"
+    url = f"{config['korapay_url']}/transactions/disburse"
     data = {
-        "amount": amount,
-        "currency": "NGN",
         "reference": reference,
-        "destination": destination, # bank_account details
-        "narration": narration
+        "destination": {
+            "type": "bank_account",
+            "amount": amount,
+            "currency": "NGN",
+            "narration": narration,
+            "bank_account": {
+                "bank": bank_code,
+                "account": account_number
+            }
+        }
     }
     return send_external_request(url=url, headers=get_korapay_headers(), data=data, type=2)
 

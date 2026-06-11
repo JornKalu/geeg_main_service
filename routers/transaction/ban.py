@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.orm import Session
 from database.db import get_db
-from modules.transactions.bank import insert_new_bank_account, update_existing_bank_account, delete_existing_bank_account, retrieve_bank_accounts, retrieve_single_bank_account, make_bank_account_default
+from modules.transactions.bank import insert_new_bank_account, update_existing_bank_account, delete_existing_bank_account, retrieve_bank_accounts, retrieve_single_bank_account, make_bank_account_default, process_external_bank_transfer
 from modules.external.korapay import get_bank_list, resolve_bank_account
-from database.schema import CreateBankAccountRequest, UpdateBankAccountRequest, BankAccountModel, BankAccountResponseModel, ErrorResponse, PlainResponse, ResolveBankAccountRequest, PlainResponseData, KoraBankListResponse, KoraResolveAccountResponse
+from database.schema import CreateBankAccountRequest, UpdateBankAccountRequest, BankAccountModel, BankAccountResponseModel, ErrorResponse, PlainResponse, ResolveBankAccountRequest, PlainResponseData, KoraBankListResponse, KoraResolveAccountResponse, WithdrawalRequest, WithdrawalResponse
 from modules.authentication.auth import auth
 from fastapi_pagination import Page
 
@@ -79,6 +79,22 @@ async def get_single(request: Request, id: int, user=Depends(auth.auth_wrapper),
 @router.get("/set-default/{id}", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def set_default(request: Request, id: int, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
     result = make_bank_account_default(db=db, id=id, user_id=user['id'])
+    if not result.get('status'):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.get('message'))
+    return result
+
+@router.post("/external_banks/withdraw", response_model=WithdrawalResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+async def withdraw_funds(request: Request, fields: WithdrawalRequest, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
+    """
+    Initiate a withdrawal from user wallet to an external bank account.
+    """
+    result = process_external_bank_transfer(
+        db=db,
+        user_id=user['id'],
+        bank_account_id=fields.bank_account_id,
+        amount=fields.amount,
+        narration=fields.narration
+    )
     if not result.get('status'):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.get('message'))
     return result
