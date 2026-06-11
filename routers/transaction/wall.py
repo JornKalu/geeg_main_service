@@ -11,7 +11,7 @@ router = APIRouter(
 )
 
 @router.post("/transfer", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
-async def wallet_to_wallet_transfer(payload: WalletTransferRequest, db: Session = Depends(get_session)):
+async def wallet_to_wallet_transfer(payload: WalletTransferRequest, user=Depends(auth.auth_wrapper), db: Session = Depends(get_session)):
     """
     Endpoint to transfer funds between two user wallets.
     """
@@ -30,7 +30,7 @@ async def wallet_to_wallet_transfer(payload: WalletTransferRequest, db: Session 
     return result
 
 @router.post("/bulk-transfer", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
-async def bulk_wallet_to_wallet_transfer(payload: BulkWalletTransferRequest, db: Session = Depends(get_session)):
+async def bulk_wallet_to_wallet_transfer(payload: BulkWalletTransferRequest, user=Depends(auth.auth_wrapper), db: Session = Depends(get_session)):
     """
     Endpoint to perform multiple wallet-to-wallet transfers from a single sender to multiple recipients.
     This operation is atomic: if any individual transfer fails, the entire bulk operation is rolled back.
@@ -51,7 +51,7 @@ async def bulk_wallet_to_wallet_transfer(payload: BulkWalletTransferRequest, db:
     
 
 @router.post("/generate-virtual-account", response_model=GenerateVirtualAccountResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
-async def create_virtual_account(payload: GenerateVirtualAccountRequest, db: Session = Depends(get_session)):
+async def create_virtual_account(payload: GenerateVirtualAccountRequest, user=Depends(auth.auth_wrapper), db: Session = Depends(get_session)):
     """
     Endpoint to generate a KoraPay virtual account for a user.
     """
