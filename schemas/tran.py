@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
+from datetime import datetime
 
 class WalletTransferRequest(BaseModel):
     from_user_id: int = Field(..., description="The ID of the sender")
@@ -39,3 +40,45 @@ class BulkWalletTransferItem(BaseModel):
 class BulkWalletTransferRequest(BaseModel):
     from_user_id: int = Field(..., description="The ID of the sender for all transfers")
     transfers: List[BulkWalletTransferItem] = Field(..., min_length=1, description="List of individual transfers")
+
+class BankAccountModel(BaseModel):
+    id: int
+    user_id: int
+    account_name: str
+    account_number: str
+    bank_name: str
+    bank_code: str
+    is_default: bool
+    status: int
+    created_at: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+
+class CreateBankAccountRequest(BaseModel):
+    account_name: str
+    account_number: str
+    bank_name: str
+    bank_code: str
+    is_default: bool = False
+
+    class Config:
+        orm_mode = True
+
+class UpdateBankAccountRequest(BaseModel):
+    account_name: Optional[str] = None
+    account_number: Optional[str] = None
+    bank_name: Optional[str] = None
+    bank_code: Optional[str] = None
+    is_default: Optional[bool] = None
+
+    class Config:
+        orm_mode = True
+
+class BankAccountResponseModel(BaseModel):
+    status: bool
+    message: str
+    data: Optional[BankAccountModel] = None
+
+    class Config:
+        orm_mode = True

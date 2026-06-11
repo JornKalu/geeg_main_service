@@ -22,6 +22,7 @@ from routers.authentication import auth
 from routers.user import pro
 from routers.project import man
 from routers.transaction import wall
+from routers.transaction import ban
 
 # Main app section here
 app = FastAPI(title="Geeg Main API Service")
@@ -31,6 +32,7 @@ app.include_router(auth.router)
 app.include_router(pro.router)
 app.include_router(man.router)
 app.include_router(wall.router)
+app.include_router(ban.router)
 app.include_router(webhook.router)
 app.include_router(test.router)
 app.include_router(seed.router)
