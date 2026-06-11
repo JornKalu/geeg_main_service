@@ -55,6 +55,42 @@ class BankAccountModel(BaseModel):
     class Config:
         orm_mode = True
 
+class KoraBankItem(BaseModel):
+    name: str
+    slug: str
+    code: str
+    ussd: Optional[str] = None
+    logo: Optional[str] = None
+
+class KoraBankListResponse(BaseModel):
+    status: bool
+    message: str
+    data: List[KoraBankItem]
+
+    class Config:
+        orm_mode = True
+
+class KoraResolveAccountData(BaseModel):
+    account_number: str
+    account_name: str
+    bank_code: str
+    bank_name: str
+
+class KoraResolveAccountResponse(BaseModel):
+    status: bool
+    message: str
+    data: Optional[KoraResolveAccountData] = None
+
+    class Config:
+        orm_mode = True
+
+class ResolveBankAccountRequest(BaseModel):
+    bank_code: str = Field(..., description="The bank code")
+    account_number: str = Field(..., description="The bank account number")
+
+    class Config:
+        orm_mode = True
+
 class CreateBankAccountRequest(BaseModel):
     account_name: str
     account_number: str

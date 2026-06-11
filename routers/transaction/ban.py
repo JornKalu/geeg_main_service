@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.orm import Session
 from database.db import get_db
 from modules.transactions.bank import insert_new_bank_account, update_existing_bank_account, delete_existing_bank_account, retrieve_bank_accounts, retrieve_single_bank_account, make_bank_account_default
-from database.schema import CreateBankAccountRequest, UpdateBankAccountRequest, BankAccountModel, BankAccountResponseModel, ErrorResponse, PlainResponse
+from modules.external.korapay import get_bank_list, resolve_bank_account
+from database.schema import CreateBankAccountRequest, UpdateBankAccountRequest, BankAccountModel, BankAccountResponseModel, ErrorResponse, PlainResponse, ResolveBankAccountRequest, PlainResponseData, KoraBankListResponse, KoraResolveAccountResponse
 from modules.authentication.auth import auth
 from fastapi_pagination import Page
 
@@ -10,6 +11,27 @@ router = APIRouter(
     prefix="/bank-accounts",
     tags=["Bank Accounts"]
 )
+
+
+@router.get("/external_banks", response_model=KoraBankListResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+async def list_banks(request: Request, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
+    """
+    Retrieve a list of supported banks for payouts from KoraPay.
+    """
+    result = get_bank_list()
+    if not result.get('status'):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.get('message'))
+    return result.get('data')
+
+@router.post("/external_banks/resolve", response_model=KoraResolveAccountResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+async def resolve_account(request: Request, fields: ResolveBankAccountRequest, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
+    """
+    Verify bank account details using KoraPay.
+    """
+    result = resolve_bank_account(bank_code=fields.bank_code, account_number=fields.account_number)
+    if not result.get('status'):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.get('message'))
+    return result.get('data')
 
 @router.post("/create", response_model=BankAccountResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def create(request: Request, fields: CreateBankAccountRequest, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
