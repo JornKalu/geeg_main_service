@@ -35,8 +35,8 @@ class MilestoneModel(BaseModel):
 	name: Optional[str] = None
 	description: Optional[str] = None
 	rank: Optional[int] = None
-	start_date: Optional[str] = None
-	end_date: Optional[str] = None
+	start_date: Optional[datetime] = None
+	end_date: Optional[datetime] = None
 	status: Optional[int] = None
 	assigned_to: Optional[int] = None
 	created_by: Optional[int] = None
@@ -50,8 +50,8 @@ class ProjectModel(BaseModel):
 	currency_id: Optional[int] = None
 	name: Optional[str] = None
 	description: Optional[str] = None
-	start_date: Optional[str] = None
-	end_date: Optional[str] = None
+	start_date: Optional[datetime] = None
+	end_date: Optional[datetime] = None
 	total_fee: Optional[float] = None
 	status: Optional[int] = None
 	created_by: Optional[int] = None
@@ -76,8 +76,8 @@ class CreateProjectRoleModel(BaseModel):
 class CreateProjectModel(BaseModel):
 	currency_id: int
 	name: str
-	start_date: str
-	end_date: str
+	start_date: datetime
+	end_date: datetime
 	total_fee: float
 	description: Optional[str] = None
 	roles: List[CreateProjectRoleModel] = Field(default_factory=list, description="List of roles to be created with the project")
@@ -133,8 +133,8 @@ class CreateMilestoneModel(BaseModel):
 	project_id: int
 	name: str
 	rank: int
-	start_date: str
-	end_date: str
+	start_date: datetime
+	end_date: datetime
 	description: Optional[str] = None
 	assigned_to: Optional[int] = None
 
@@ -144,8 +144,8 @@ class CreateMilestoneModel(BaseModel):
 class UpdateMilestoneModel(BaseModel):
 	name: Optional[str] = None
 	rank: Optional[int] = None
-	start_date: Optional[str] = None
-	end_date: Optional[str] = None
+	start_date: Optional[datetime] = None
+	end_date: Optional[datetime] = None
 	description: Optional[str] = None
 	assigned_to: Optional[int] = None
 
