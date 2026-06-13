@@ -190,6 +190,8 @@ def add_user_to_role(db: Session, user_id: int=0, role_id: int=0, invite_id: int
 				}
 
 def insert_new_milestone(db: Session, project_id: int, name: str, created_by: int, rank: int, start_date: str, end_date: str, description: str = None, assigned_to: int = None):
+	start_date = process_date_string(date_str=start_date)
+	end_date = process_date_string(date_str=end_date)
 	milestone = create_milestone(db=db, project_id=project_id, name=name, created_by=created_by, description=description, rank=rank, start_date=start_date, end_date=end_date, assigned_to=assigned_to, status=1)
 	return {
 		'status': True,
@@ -199,6 +201,10 @@ def insert_new_milestone(db: Session, project_id: int, name: str, created_by: in
 
 def update_existing_milestone(db: Session, id: int=0, values: Dict={}):
 	values = process_schema_dictionary(info=values)
+	if 'start_date' in values:
+		values['start_date'] = process_date_string(date_str=values['start_date'])
+	if 'end_date' in values:
+		values['end_date'] = process_date_string(date_str=values['end_date'])
 	update_milestone(db=db, id=id, values=values)
 	return {
 		'status': True,
@@ -417,4 +423,3 @@ def retrieve_single_invite(db: Session, id: int=0):
 			'message': 'Success',
 			'data': invite
 		}
-
