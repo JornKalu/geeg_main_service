@@ -61,7 +61,7 @@ class ProjectModel(BaseModel):
 	wallet: Optional[WalletModel] = None
 	milestones: Optional[List[MilestoneModel]] = None
 	creator: Optional[UserMainModel] = None
-	roles: Optional[List[RoleModel]] = []
+	roles: Optional[List[RoleModel]] = None
 
 	class Config:
 		orm_mode = True
