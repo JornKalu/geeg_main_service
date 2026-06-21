@@ -22,7 +22,7 @@ class RoleModel(BaseModel):
 	icon: Optional[str] = None
 	fee: Optional[float] = None
 	status: Optional[int] = None
-	role_users: Optional[RoleUserModel] = None
+	role_users: Optional[List[RoleUserModel]] = None
 	created_at: Optional[datetime] = None
 
 	class Config:
