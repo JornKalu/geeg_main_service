@@ -41,6 +41,13 @@ class User(Base):
         lazy="selectin"
     )
 
+    projects = relationship(
+        "Project", 
+        uselist=True, 
+        primaryjoin="User.id == Project.created_by",
+        lazy="selectin"
+    )
+
 def create_user(db: Session, username: str, email: str, password: str, pin: str = None, phone_number: str = None, user_type: int = 1, status: int = 1, commit: bool = False):
     user = User(
         username=username,

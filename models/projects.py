@@ -5,6 +5,9 @@ from sqlalchemy.sql import func
 from sqlalchemy.sql.schema import ForeignKey
 from database.db import Base, get_laravel_datetime
 
+from .users import User
+from .roles import Role
+from .roles_users import Role_User
 
 class Project(Base):
     __tablename__ = "projects"
@@ -55,6 +58,23 @@ class Project(Base):
         primaryjoin="Project.id == Invite.project_id",
         lazy="selectin"
     )
+
+    creator = relationship(
+        "User",
+        back_populates="projects"
+    )
+
+    @property
+    def progress(self) -> int:
+        # CRITICAL CATCH: Ignore soft-deleted milestones!
+        active_milestones = [m for m in self.milestones if m.deleted_at is None]
+        
+        if not active_milestones:
+            return 0
+            
+        completed_count = sum(1 for m in active_milestones if m.status == 3) # 3 = completed
+        
+        return int((completed_count / len(active_milestones)) * 100)
 
 
 def create_project(db: Session, currency_id: int, name: str, start_date: str, end_date: str, created_by: int, total_fee: float = 0.0, description: str = None, status: int = 1, commit: bool = False):
@@ -116,6 +136,8 @@ def get_single_project_by_id(db: Session, id: int = 0):
         selectinload(Project.currency),
         selectinload(Project.wallet),
         selectinload(Project.milestones),
+        selectinload(Project.creator).selectinload(User.profile),
+        selectinload(Project.roles).selectinload(Role.role_users).selectinload(Role_User.user).selectinload(User.profile),
     ).filter_by(id=id).first()
 
 def get_just_single_project_by_id(db: Session, id: int = 0):
@@ -126,6 +148,8 @@ def get_projects(db: Session, filters: Dict = {}):
         selectinload(Project.currency),
         selectinload(Project.wallet),
         selectinload(Project.milestones),
+        selectinload(Project.creator).selectinload(User.profile),
+        selectinload(Project.roles).selectinload(Role.role_users).selectinload(Role_User.user).selectinload(User.profile),
     ).filter(Project.deleted_at == None)
     
     if 'created_by' in filters:

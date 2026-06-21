@@ -56,9 +56,12 @@ class ProjectModel(BaseModel):
 	status: Optional[int] = None
 	created_by: Optional[int] = None
 	created_at: Optional[datetime] = None
+	progress: Optional[int] = 0
 	currency: Optional[WalletCurrencyModel] = None
 	wallet: Optional[WalletModel] = None
 	milestones: Optional[List[MilestoneModel]] = None
+	creator: Optional[UserMainModel] = None
+	roles: Optional[List[RoleModel]] = []
 
 	class Config:
 		orm_mode = True
