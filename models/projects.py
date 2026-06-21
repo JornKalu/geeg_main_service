@@ -20,7 +20,7 @@ class Project(Base):
     end_date = Column(Date, nullable=True)
     total_fee = Column(DECIMAL(15, 2), nullable=True)
     status = Column(SmallInteger, default=1) # 1=active, 0=inactive/draft
-    created_by = Column(BigInteger, nullable=False)
+    created_by = Column(BigInteger, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
