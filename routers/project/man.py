@@ -44,7 +44,7 @@ async def get_all(request: Request, db: Session = Depends(get_db), user=Depends(
 
 @router.get("/get_single/{project_id}", response_model=ProjectResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def get_single(request: Request, db: Session = Depends(get_db), user=Depends(auth.auth_wrapper), project_id: int = 0):
-    return retrieve_projects(db=db, id=project_id)
+    return retrieve_single_project(db=db, id=project_id)
 
 @router.post("/roles/create", response_model=RoleResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def roles_create(request: Request, fields: CreateRoleModel, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
