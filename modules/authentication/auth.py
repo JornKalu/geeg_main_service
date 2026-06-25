@@ -266,10 +266,10 @@ def send_email_token(db: Session, email: str=None):
     expired_at = get_next_few_minutes(minutes=minutes)
     token = str(random.randint(100000,999999))
     create_token(db=db, email=email, token_type="email", token_value=token, status=0, expired_at=expired_at)
-    e_send_token(username="Geeg User", email=email, token=token, minutes=minutes)
+    data = e_send_token(username="Geeg User", email=email, token=token, minutes=minutes)
     return {
         'status': True,
-        'message': 'Success',
+        'message': f'Success - {data}',
     }
     
 def send_user_email_token(db: Session, email: str=None):
