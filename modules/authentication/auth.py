@@ -269,7 +269,7 @@ def send_email_token(db: Session, email: str=None):
     data = e_send_token(username="Geeg User", email=email, token=token, minutes=minutes)
     return {
         'status': True,
-        'message': f'Success - {data}',
+        'message': 'Success',
     }
     
 def send_user_email_token(db: Session, email: str=None):
