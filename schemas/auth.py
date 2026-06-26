@@ -5,7 +5,7 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     first_name: str
-    other_name: Optional[str] = None
+    # other_name: Optional[str] = None
     last_name: str
     is_staff: Optional[int] = 0
     
