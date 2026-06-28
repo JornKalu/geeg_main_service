@@ -164,7 +164,6 @@ def process_external_bank_transfer(db: Session, user_id: int, bank_account_id: i
         amount=amount,
         total_amount=amount, # Assuming zero fee for now
         values=transaction_data,
-        commit=False
     )
 
     # 6. Call KoraPay Payout API
