@@ -36,7 +36,7 @@ def create_user_with_relevant_rows(db: Session, username: str=None, phone_number
     if is_staff == 1:
         user_type = 2
     # user = create_user(db=db, email=email, username=username, phone_number=phone_number, password=password, user_type=user_type, status=1)
-    user = create_user(db=db, email=email, phone_number=phone_number, password=password, user_type=user_type, status=1)
+    user = create_user(db=db, email=email, password=password, user_type=user_type, status=1)
     if is_staff == 0:
         create_profile(db=db, user_id=user.id, country_id=country_id, first_name=first_name, last_name=last_name)
         create_wallet(db=db, currency_id=currency_id, user_id=user.id)
@@ -51,12 +51,12 @@ def registration_unique_field_check(db: Session, email: str=None, username: str=
     #         'status': False,
     #         'message': 'Username already exist'
     #     }
-    phone_number_check = get_single_user_by_phone_number(db=db, phone_number=phone_number)
-    if phone_number_check is not None:
-        return {
-            'status': False,
-            'message': 'Phone number already exist'
-        }
+    # phone_number_check = get_single_user_by_phone_number(db=db, phone_number=phone_number)
+    # if phone_number_check is not None:
+    #     return {
+    #         'status': False,
+    #         'message': 'Phone number already exist'
+    #     }
     email_check = get_single_user_by_email(db=db, email=email)
     if email_check is not None:
         return {
