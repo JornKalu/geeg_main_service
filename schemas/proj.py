@@ -124,10 +124,25 @@ class UpdateRoleModel(BaseModel):
 	class Config:
 		orm_mode = True
 
+class CreateMultipleRoleModel(BaseModel):
+	project_id: int
+	roles: List[CreateProjectRoleModel] = Field(default_factory=list, description="List of roles to be created with the project")
+
+	class Config:
+		orm_mode = True
+
 class RoleResponseModel(BaseModel):
 	status: bool
 	message: str
 	data: Optional[RoleModel] = None
+
+	class Config:
+		orm_mode = True
+
+class MultipleRoleResponseModel(BaseModel):
+	status: bool
+	message: str
+	data: Optional[List[RoleModel]] = None
 
 	class Config:
 		orm_mode = True

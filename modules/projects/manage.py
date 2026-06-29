@@ -72,9 +72,9 @@ def insert_new_role(db: Session, user_id: int, project_id: int, name: str, fee: 
 	else:
 		if project.created_by != user_id:
 			return {
-			'status': False,
-			'message': 'Only project creator can create roles',
-			'data': None
+				'status': False,
+				'message': 'Only project creator can create roles',
+				'data': None
 		}
 		else:
 			role = create_role(db=db, project_id=project_id, name=name, fee=fee, description=description, icon=icon, status=1)
@@ -83,6 +83,34 @@ def insert_new_role(db: Session, user_id: int, project_id: int, name: str, fee: 
 				'message': 'Success',
 				'data': role,
 			}
+
+def insert_multiple_new_role(db: Session, user_id: int, project_id: int, roles: List[Dict[str, Any]]):
+	project = get_just_single_project_by_id(db=db, id=project_id)
+	if project is None:
+		return {
+			'status': False,
+			'message': 'Project not found',
+			'data': None
+		}
+	else:
+		if project.created_by != user_id:
+			return {
+				'status': False,
+				'message': 'Only project creator can create roles',
+				'data': None
+		}
+		else:
+			resp_roles = []
+			if len(roles) > 0:
+				for i in range(len(roles)):
+					new_role = create_role(db=db, project_id=project_id, name=roles[i]['name'], fee=roles[i]['fee'], description=roles[i]['description'], icon=roles[i]['icon'], status=1)
+					resp_roles.append(new_role)
+			return {
+				'status': False,
+				'message': 'Success',
+				'data': resp_roles,
+			}
+
 
 def update_existing_role(db: Session, user_id: int=0, id: int=0, values: Dict={}):
 	role = get_just_single_role_by_id(db=db, id=id)

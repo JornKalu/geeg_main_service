@@ -1,8 +1,8 @@
 from typing import List, Dict
 from fastapi import APIRouter, Request, Depends, HTTPException, Query
 from modules.authentication.auth import auth
-from modules.projects.manage import insert_new_project, update_existing_project, delete_existing_project, retrieve_projects, retrieve_single_project, insert_new_role, update_existing_role, delete_existing_role, retrieve_roles, retrieve_single_role, add_user_to_role, insert_new_milestone, update_existing_milestone, delete_existing_milestone, retrieve_milestones, retrieve_single_milestone, send_invite, accept_invite, reject_invite, delete_existing_invite, retrieve_invites, retrieve_single_invite
-from database.schema import ErrorResponse, PlainResponse, RoleModel, MilestoneModel, ProjectModel, CreateProjectModel, UpdateProjectModel, ProjectResponseModel, CreateRoleModel, UpdateRoleModel, RoleResponseModel, CreateMilestoneModel, UpdateMilestoneModel, MilestoneResponseModel, AddUserToRoleModel, InviteModel, InviteResponseModel, SendInviteModel, AcceptInviteModel, RejectInviteModel
+from modules.projects.manage import insert_new_project, update_existing_project, delete_existing_project, retrieve_projects, retrieve_single_project, insert_new_role, insert_multiple_new_role, update_existing_role, delete_existing_role, retrieve_roles, retrieve_single_role, add_user_to_role, insert_new_milestone, update_existing_milestone, delete_existing_milestone, retrieve_milestones, retrieve_single_milestone, send_invite, accept_invite, reject_invite, delete_existing_invite, retrieve_invites, retrieve_single_invite
+from database.schema import ErrorResponse, PlainResponse, RoleModel, MilestoneModel, ProjectModel, CreateProjectModel, UpdateProjectModel, ProjectResponseModel, CreateRoleModel, UpdateRoleModel, RoleResponseModel, CreateMilestoneModel, UpdateMilestoneModel, MilestoneResponseModel, AddUserToRoleModel, InviteModel, InviteResponseModel, SendInviteModel, AcceptInviteModel, RejectInviteModel, CreateMultipleRoleModel, MultipleRoleResponseModel
 from database.db import get_db
 from sqlalchemy.orm import Session
 from fastapi_pagination import LimitOffsetPage, Page
@@ -49,6 +49,11 @@ async def get_single(request: Request, db: Session = Depends(get_db), user=Depen
 @router.post("/roles/create", response_model=RoleResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def roles_create(request: Request, fields: CreateRoleModel, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
     req = insert_new_role(db=db, user_id=user['id'], project_id=fields.project_id, name=fields.name, fee=fields.fee, description=fields.description, icon=fields.icon)
+    return req
+
+@router.post("/roles/create_multiple", response_model=MultipleRoleResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+async def roles_create_multiple(request: Request, fields: CreateMultipleRoleModel, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
+    req = insert_multiple_new_role(db=db, user_id=user['id'], project_id=fields.project_id, roles=fields.roles)
     return req
 
 @router.post("/roles/update/{role_id}", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
