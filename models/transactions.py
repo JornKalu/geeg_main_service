@@ -1,5 +1,5 @@
 from typing import Dict
-from sqlalchemy import Column, String, BigInteger, Text, DateTime, DECIMAL, CheckConstraint, desc
+from sqlalchemy import Column, String, BigInteger, Text, DateTime, DECIMAL, CheckConstraint, desc, and_, or_
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
@@ -128,5 +128,14 @@ def get_transactions(db: Session, filters: Dict = {}):
         
     if 'invoice_id' in filters:
         query = query.filter_by(invoice_id=filters['invoice_id'])
+        
+    if 'bank_account_id' in filters:
+        query = query.filter_by(bank_account_id=filters['bank_account_id'])
+        
+    if 'user_id' in filters:
+        query = query.filter(or_(Transaction.from_user_id == filters['user_id'], Transaction.to_user_id == filters['user_id']))
+        
+    if 'wallet_id' in filters:
+        query = query.filter(or_(Transaction.from_wallet_id == filters['wallet_id'], Transaction.to_wallet_id == filters['wallet_id']))
         
     return query.order_by(desc(Transaction.created_at))

@@ -52,6 +52,15 @@ class TransactionModel(BaseModel):
     class Config:
         orm_mode = True
 
+class TransactionResponseModel(BaseModel):
+    status: bool
+    message: str
+    data: Optional[TransactionModel] = None
+
+    class Config:
+        orm_mode = True
+
+
 class WithdrawalResponse(BaseModel):
     status: bool
     message: str
