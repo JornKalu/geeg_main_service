@@ -55,7 +55,7 @@ async def create_virtual_account(payload: GenerateVirtualAccountRequest, user=De
     """
     Endpoint to generate a KoraPay virtual account for a user.
     """
-    result = generate_virtual_account_number(db, user_id=payload.user_id)
+    result = generate_virtual_account_number(db, wallet_id=payload.wallet_id)
     if not result.get('status'):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

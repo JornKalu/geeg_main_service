@@ -10,12 +10,12 @@ class WalletTransferRequest(BaseModel):
     narration: Optional[str] = Field(None, description="Optional description for the transfer")
 
 class GenerateVirtualAccountRequest(BaseModel):
-    user_id: int = Field(..., description="The ID of the user to generate an account for")
+    wallet_id: int = Field(..., description="The ID of the wallet to generate an account for")
 
 class VirtualAccountResponseDetails(BaseModel):
-    account_name: str
-    account_number: str
-    bank_name: str
+    account_name: Optional[str] = None
+    account_number: Optional[str] = None
+    bank_name: Optional[str] = None
 
     class Config:
         orm_mode = True
