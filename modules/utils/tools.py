@@ -33,17 +33,33 @@ def rand_lower_string_generator(size=10):
     chars = string.ascii_lowercase + string.digits
     return ''.join(random.choice(chars) for _ in range(size))
 
+# def generate_transaction_reference(tran_type: str = None, rand_type: int = 1, rand_size: int = 10):
+#     dt = datetime.now()
+#     ts = datetime.timestamp(dt)
+#     ts = int(ts)
+#     return f"{uuid.uuid4().hex[:7]}_{ts}"
+#     # if rand_type == 1:
+#     #     return str(tran_type).upper() + "_" + rand_string_generator(size=rand_size) + "_" + str(ts)
+#     # elif rand_type == 2:
+#     #     return str(tran_type).upper() + "_" + rand_upper_string_generator(size=rand_size) + "_" + str(ts)
+#     # elif rand_type == 3:
+#     #     return str(tran_type).upper() + "_" + rand_lower_string_generator(size=rand_size) + "_" + str(ts)
+
 def generate_transaction_reference(tran_type: str = None, rand_type: int = 1, rand_size: int = 10):
-    dt = datetime.now()
-    ts = datetime.timestamp(dt)
-    ts = int(ts)
-    return f"{uuid.uuid4().hex[:7]}_{ts}"
-    # if rand_type == 1:
-    #     return str(tran_type).upper() + "_" + rand_string_generator(size=rand_size) + "_" + str(ts)
-    # elif rand_type == 2:
-    #     return str(tran_type).upper() + "_" + rand_upper_string_generator(size=rand_size) + "_" + str(ts)
-    # elif rand_type == 3:
-    #     return str(tran_type).upper() + "_" + rand_lower_string_generator(size=rand_size) + "_" + str(ts)
+    ts = int(datetime.now().timestamp())
+    random_part = uuid.uuid4().hex[:7]
+    
+    # Map your database types to clean, standard 3-letter banking prefixes
+    prefix_map = {
+        'external_transfer': 'EXT',
+        'wallet_transfer': 'WLT',
+        'invoice_payment': 'INV',
+        'deposit': 'DEP'
+    }
+    
+    prefix = prefix_map.get(tran_type, 'TXN') if tran_type else 'TXN'
+    
+    return f"{prefix}_{ts}_{random_part}"
 
 def generate_basic_reference(rand_size: int=10):
     dt = datetime.now()

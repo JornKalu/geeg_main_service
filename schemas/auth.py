@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, Any, Literal
+from enum import Enum
 
 class RegisterRequest(BaseModel):
     email: str
@@ -57,6 +58,20 @@ class CheckUserResponseModel(BaseModel):
     status: bool
     message: str
     data: Optional[int] = None
+    
+    class Config:
+        orm_mode = True
+
+class Provider(str, Enum):
+    google = "google"
+    facebook = "facebook"
+    apple = "apple"
+    x = "x"
+
+class SocialAuthRequest(BaseModel):
+    provider: Provider
+    token: str
+    email: Optional[str] = None
     
     class Config:
         orm_mode = True
