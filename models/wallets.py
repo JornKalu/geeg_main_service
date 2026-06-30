@@ -82,8 +82,17 @@ def force_delete_wallet(db: Session, id: int = 0, commit: bool = False):
     return True
 
 
-def get_single_wallet_by_id(db: Session, id: int = 0):
-    return db.query(Wallet).filter_by(id=id).first()
+def get_single_wallet_by_id(db: Session, id: int, for_update: bool = False):
+    """
+    Retrieves the wallet for a specific id.
+    Pass for_update=True to lock the row during financial mutations.
+    """
+    query = db.query(Wallet).filter_by(id=id)
+    
+    if for_update:
+        query = query.with_for_update()
+        
+    return query.first()
 
 
 def get_wallet_by_user_id(db: Session, user_id: int, for_update: bool = False):

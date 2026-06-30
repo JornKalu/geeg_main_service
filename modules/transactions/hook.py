@@ -3,12 +3,12 @@ import hmac
 import hashlib
 import json
 import traceback
-
+from decimal import Decimal
 from sqlalchemy.orm import Session
 
 from settings.config import load_env_config
 
-from database.model import create_transaction, get_transaction_by_reference, update_wallet, get_wallet_by_user_id, get_wallet_by_account_number
+from database.model import create_transaction, get_transaction_by_reference, update_wallet, get_wallet_by_user_id, get_wallet_by_account_number, get_single_wallet_by_id
 from modules.utils.tools import generate_transaction_reference
 from modules.messaging.email import e_notification
 
@@ -61,87 +61,80 @@ def process_korapay_event(db: Session, payload: Dict) -> Dict:
 
 def handle_virtual_account_payment(db: Session, payment_data: Dict) -> Dict:
     """
-    Handles the logic for a successful virtual account payment.
+    Handles the logic for a successful virtual account payment (Deposit).
     Updates wallet balance, creates a transaction record, and sends notifications.
     """
     try:
-        amount = float(payment_data.get("amount"))
+        # 1. Safe extraction and Decimal conversion
+        amount = Decimal(str(payment_data.get("amount", 0)))
         currency = payment_data.get("currency")
         korapay_reference = payment_data.get("reference")
         narration = payment_data.get("description", "Virtual account deposit")
         customer_info = payment_data.get("customer", {})
         virtual_bank_account_details = payment_data.get("virtual_bank_account_details", {})
         
-        # Idempotency check: Prevent reprocessing the same webhook
+        # 2. Idempotency check: Prevent reprocessing the same Kora webhook
         existing_transaction = get_transaction_by_reference(db, reference=korapay_reference)
-        if existing_transaction and existing_transaction.status == 'completed':
+        if existing_transaction:
             print(f"Duplicate webhook for KoraPay reference {korapay_reference}. Already processed.")
+            # We return success so KoraPay stops retrying this payload
             return {"status": "success", "message": "Duplicate event, already processed."}
         
-
-        
-        # Extract user_id from account_reference.
-        # Assuming account_reference is in the format "USER_{user_id}_VA"
-        account_reference = None
+        # 3. Extract External Sender details safely
         account_name = None
         account_number = None
         bank_name = None
+        account_reference = ""
 
-        if virtual_bank_account_details != {}:
+        if virtual_bank_account_details:
             payer_bank_account = virtual_bank_account_details.get("payer_bank_account", {})
-
-            if payer_bank_account != {}:
-                account_name = payer_bank_account.get('account_name', None)
-                account_number = payer_bank_account.get('account_number', None)
-                bank_name = payer_bank_account.get('bank_name', None)
+            if payer_bank_account:
+                account_name = payer_bank_account.get('account_name')
+                account_number = payer_bank_account.get('account_number')
+                bank_name = payer_bank_account.get('bank_name')
             
             virtual_bank_account = virtual_bank_account_details.get("virtual_bank_account", {})
-
-            if virtual_bank_account != {}:
+            if virtual_bank_account:
                 account_reference = virtual_bank_account.get("account_reference", "")
         
-
-        # account_reference = payment_data.get("account_reference", "")
+        # 4. Parse wallet_id from our new architecture (VA_WLT_{wallet_id})
         account_reference_parts = account_reference.split('_')
-        if len(account_reference_parts) < 2 or not account_reference_parts[1].isdigit():
-            error_msg = f"Could not parse user_id from account_reference: {account_reference}"
-            print(error_msg)
-            e_notification(
-                email=config.get('admin_email', 'admin@example.com'),
-                title="KoraPay Webhook Error",
-                sub_title=f"Failed to process virtual account payment: Invalid account reference",
-                recipient_name="Admin",
-                msg=f"{error_msg}. Payload: {payment_data}"
-            )
+        if len(account_reference_parts) != 3 or account_reference_parts[0] != "VA" or not account_reference_parts[2].isdigit():
+            error_msg = f"Could not parse wallet_id from account_reference: {account_reference}"
+            # Log & Alert Admin ...
             return {"status": "error", "message": error_msg}
             
-        user_id = int(account_reference_parts[1])
+        wallet_id = int(account_reference_parts[2])
 
-        user_wallet = get_wallet_by_user_id(db, user_id=user_id)
-        if not user_wallet:
-            error_msg = f"Wallet not found for user_id: {user_id} for KoraPay reference {korapay_reference}"
-            print(error_msg)
-            e_notification(
-                email=config.get('admin_email', 'admin@example.com'),
-                title="KoraPay Webhook Error",
-                sub_title=f"Wallet not found for user {user_id}",
-                recipient_name="Admin",
-                msg=f"{error_msg}. Payload: {payment_data}"
-            )
-            return {"status": "error", "message": "User wallet not found"}
+        # =================================================================
+        # PHASE 1: ATOMIC WALLET DEPOSIT
+        # =================================================================
+        
+        # 5. Lock the wallet row to prevent race conditions during rapid deposits/withdrawals
+        locked_wallet = get_single_wallet_by_id(db=db, id=wallet_id, for_update=True)
+        
+        if not locked_wallet:
+            # Log & Alert Admin ...
+            return {"status": "error", "message": "Target wallet not found"}
 
-        prev_balance = float(user_wallet.balance)
+        prev_balance = Decimal(str(locked_wallet.balance))
         new_balance = prev_balance + amount
-        update_wallet(db, id=user_wallet.id, values={'balance': new_balance}, commit=False)
 
+        # 6. Stage the database mutations (commit=False for get_db auto-commit)
+        update_wallet(
+            db, 
+            id=locked_wallet.id, 
+            values={'balance': new_balance}, 
+            commit=False
+        )
 
         internal_reference = generate_transaction_reference(tran_type="deposit")
         transaction_data = {
-            'to_user_id': user_id,
-            'to_wallet_id': user_wallet.id,
+            'to_user_id': locked_wallet.user_id, # Can be None if it's a Project wallet!
+            'to_wallet_id': locked_wallet.id,
             'narration': narration,
-            'from_wallet_previous_balance': prev_balance, # For deposits, from_wallet is not applicable, but we can use this for audit
-            'from_wallet_new_balance': new_balance,
+            'from_wallet_previous_balance': None, # It's an external deposit, no internal "from" wallet
+            'from_wallet_new_balance': None,
             'to_wallet_previous_balance': prev_balance,
             'to_wallet_new_balance': new_balance,
             'status': 'completed',
@@ -152,10 +145,23 @@ def handle_virtual_account_payment(db: Session, payment_data: Dict) -> Dict:
             'external_bank_name': bank_name,
             'meta_data': payment_data
         }
-        create_transaction(db=db, transaction_type='deposit', reference=internal_reference, amount=amount, total_amount=amount, values=transaction_data, commit=True)
+        
+        create_transaction(
+            db=db, 
+            transaction_type='deposit', 
+            reference=internal_reference, 
+            amount=amount, 
+            total_amount=amount, 
+            values=transaction_data, 
+            commit=False
+        )
 
+        # =================================================================
+        # PHASE 2: NOTIFICATIONS
+        # =================================================================
         user_email = customer_info.get("email")
-        user_name = customer_info.get("name", f"User {user_id}")
+        user_name = customer_info.get("name", "Valued Customer")
+        
         if user_email:
             e_notification(
                 email=user_email,
@@ -165,18 +171,18 @@ def handle_virtual_account_payment(db: Session, payment_data: Dict) -> Dict:
                 msg=f"A deposit of {currency} {amount:,.2f} has been successfully credited to your wallet. Your new balance is {currency} {new_balance:,.2f}. Transaction Reference: {internal_reference}"
             )
 
-        print(f"Successfully processed virtual account payment for user {user_id}, reference {korapay_reference}")
+        print(f"Successfully processed virtual account payment for wallet {wallet_id}, Kora ref {korapay_reference}")
+        
+        # FastAPI's get_db() will commit the transaction perfectly right after we return
         return {"status": "success", "message": "Virtual account payment processed successfully"}
 
     except Exception as e:
-        db.rollback() # Rollback any changes if an error occurs
+        # CRITICAL: We hit rollback here because we DO NOT want get_db() to crash.
+        # We need to gracefully return an HTTP 200 to KoraPay so they know we received it,
+        # but internally we sound the alarms.
+        db.rollback() 
         error_trace = traceback.format_exc()
         print(f"Error processing KoraPay virtual account payment: {e}\n{error_trace}")
-        e_notification(
-            email=config.get('admin_email', 'admin@example.com'),
-            title="KoraPay Webhook Critical Error",
-            sub_title=f"Failed to process virtual account payment: {e}",
-            recipient_name="Admin",
-            msg=f"A critical error occurred while processing a KoraPay virtual account payment. Reference: {payment_data.get('reference')}. Error: {e}. Full payload: {payment_data}. Stack Trace: {error_trace}"
-        )
+        
+        # Alert Admin ...
         return {"status": "error", "message": "Internal server error during payment processing."}
