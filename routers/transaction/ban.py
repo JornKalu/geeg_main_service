@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from database.db import get_db
 from modules.transactions.bank import insert_new_bank_account, update_existing_bank_account, delete_existing_bank_account, retrieve_bank_accounts, retrieve_single_bank_account, make_bank_account_default, process_external_bank_transfer
@@ -91,10 +92,15 @@ async def withdraw_funds(request: Request, fields: WithdrawalRequest, user=Depen
     result = process_external_bank_transfer(
         db=db,
         user_id=user['id'],
+        user_email=user['email'],
         bank_account_id=fields.bank_account_id,
         amount=fields.amount,
         narration=fields.narration
     )
     if not result.get('status'):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.get('message'))
+        # raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.get('message'))
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            content=result
+        )
     return result

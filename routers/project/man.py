@@ -53,7 +53,10 @@ async def roles_create(request: Request, fields: CreateRoleModel, user=Depends(a
 
 @router.post("/roles/create_multiple", response_model=MultipleRoleResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def roles_create_multiple(request: Request, fields: CreateMultipleRoleModel, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
-    req = insert_multiple_new_role(db=db, user_id=user['id'], project_id=fields.project_id, roles=fields.roles)
+    roles = []
+    if fields.roles != []:
+        roles = [t.model_dump() for t in fields.roles]
+    req = insert_multiple_new_role(db=db, user_id=user['id'], project_id=fields.project_id, roles=roles)
     return req
 
 @router.post("/roles/update/{role_id}", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})

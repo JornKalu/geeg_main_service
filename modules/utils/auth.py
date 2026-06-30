@@ -55,12 +55,12 @@ class AuthHandler():
 
     def encode_token(self, db: Session, user: Dict={}):
         payload = {
-            'exp': datetime.utcnow() + timedelta(days=365),
-            'iat': datetime.utcnow(),
+            'exp': datetime.now(timezone.utc) + timedelta(days=365),
+            'iat': datetime.now(timezone.utc),
             'sub': str(user['id'])
             # 'sub': json.dumps(user['id'])
         }
-        expired_at = (datetime.utcnow() + timedelta(days=365)).strftime("%Y/%m/%d %H:%M:%S")
+        expired_at = (datetime.now(timezone.utc) + timedelta(days=365)).strftime("%Y/%m/%d %H:%M:%S")
         token = jwt.encode(payload, self.secret, algorithm="HS256")
         if isinstance(token, bytes):
             token = token.decode('utf-8')
@@ -81,8 +81,8 @@ class AuthHandler():
             
             return {
                 'id': user.id,
-                'username': user.username,
-                'phone_number': user.phone_number,
+                # 'username': user.username,
+                # 'phone_number': user.phone_number,
                 'email': user.email,
             }
         

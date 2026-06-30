@@ -86,11 +86,17 @@ def get_single_wallet_by_id(db: Session, id: int = 0):
     return db.query(Wallet).filter_by(id=id).first()
 
 
-def get_wallet_by_user_id(db: Session, user_id: int):
+def get_wallet_by_user_id(db: Session, user_id: int, for_update: bool = False):
     """
     Retrieves the wallet for a specific user.
+    Pass for_update=True to lock the row during financial mutations.
     """
-    return db.query(Wallet).filter_by(user_id=user_id, deleted_at=None).first()
+    query = db.query(Wallet).filter_by(user_id=user_id, deleted_at=None)
+    
+    if for_update:
+        query = query.with_for_update()
+        
+    return query.first()
 
 
 def get_wallet_by_account_number(db: Session, account_number: str):
