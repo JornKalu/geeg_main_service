@@ -4,14 +4,147 @@ from modules.utils.net import get_ip_info, process_phone_number, validate_email_
 from modules.utils.tools import process_schema_dictionary
 from modules.utils.auth import AuthHandler, get_next_few_minutes, check_if_time_as_pass_now
 from modules.messaging.email import e_send_token
+from settings.config import load_env_config
 from sqlalchemy.orm import Session
-import random
+import random, datetime, sys, traceback, requests, jwt
 import datetime
 import random
 import sys, traceback
 
 auth = AuthHandler()
+env_config = load_env_config()
 
+
+def verify_social_token(provider: str, token: str):
+    """
+    Verifies the social token with the respective provider.
+    Returns user data dictionary if valid, None otherwise.
+    """
+    try:
+        if provider == 'google':
+            response = requests.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={token}")
+            if response.status_code == 200:
+                data = response.json()
+                # Check that the token was intended for our app
+                if data.get('aud') == env_config['google_client_id']:
+                    return {
+                        'status': True,
+                        'message': 'Success',
+                        'status_code': response.status_code,
+                        'data':{
+                            'provider_id': data.get('sub'),
+                            'email': data.get('email'),
+                            'first_name': data.get('given_name'),
+                            'last_name': data.get('family_name'),
+                            'avatar': data.get('picture'),
+                            'meta_data': data
+                        },
+                    }
+                else:
+                    return {
+                        'status': False,
+                        'message': f"Token not intended for app: aud - {data.get('aud')}, client_id - {env_config['google_client_id']}",
+                        'status_code': response.status_code,
+                        'data': None
+                    }
+            else:
+                return {
+                    'status': False,
+                    'message': response.text,
+                    'status_code': response.status_code,
+                    'data': None
+                }
+        elif provider == 'x':
+            # For X, we expect an OAuth 2.0 Access Token
+            headers = {"Authorization": f"Bearer {token}"}
+            response = requests.get("https://api.twitter.com/2/users/me?user.fields=profile_image_url", headers=headers)
+            if response.status_code == 200:
+                data = response.json().get('data', {})
+                return {
+                    'status': True,
+                    'message': 'Success',
+                    'status_code': response.status_code,
+                    'data':{
+                        'provider_id': data.get('id'),
+                        'email': None, # v2 doesn't return email easily without special permissions
+                        'first_name': data.get('name'),
+                        'last_name': None,
+                        'avatar': data.get('profile_image_url'),
+                        'meta_data': data
+                    }
+                }
+            else:
+                return {
+                    'status': False,
+                    'message': response.text,
+                    'status_code': response.status_code,
+                    'data': None
+                }
+        elif provider == 'facebook':
+            # Verify with Facebook Graph API
+            fb_url = f"https://graph.facebook.com/me?fields=id,name,email,first_name,last_name,picture&access_token={token}"
+            response = requests.get(fb_url)
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    'status': True,
+                    'message': 'Success',
+                    'status_code': response.status_code,
+                    'data': {
+                        'provider_id': data.get('id'),
+                        'email': data.get('email'),
+                        'first_name': data.get('first_name'),
+                        'last_name': data.get('last_name'),
+                        'avatar': data.get('picture', {}).get('data', {}).get('url'),
+                        'meta_data': data
+                    },
+                }
+            else:
+                return {
+                    'status': False,
+                    'message': response.text,
+                    'status_code': response.status_code,
+                    'data': None
+                }
+        elif provider == 'apple':
+            # For Apple, token is the id_token (JWT)
+            try:
+                decoded = jwt.decode(token, options={"verify_signature": False})
+                if decoded.get('aud') == env_config['apple_client_id']:
+                    return {
+                        'status': True,
+                        'message': 'Success',
+                        'status_code': 200,
+                        'data':{
+                                'provider_id': decoded.get('sub'),
+                                'email': decoded.get('email'),
+                                'first_name': None, # Apple only provides name on first login via frontend
+                                'last_name': None,
+                                'avatar': None,
+                                'meta_data': decoded
+                            }
+                    }
+                return {
+                    'status': False,
+                    'message': "Apple token decryption failed",
+                    'status_code': 0,
+                    'data': None
+                }
+            except Exception as e:
+                return {
+                    'status': False,
+                    'message': f"Social verification failed: {str(e)}",
+                    'status_code': 0,
+                    'data': None
+                }
+    except Exception as e:
+        return {
+            'status': False,
+            'message': f"Social verification failed: {str(e)}",
+            'status_code': 0,
+            'data': None
+        }
+    return None
 
 def register_user(db: Session, username: str = None, email: str = None, phone_number: str = None, password: str = None, first_name: str = None, last_name: str = None, is_staff: int = 0):
     country = get_country_by_code(db=db, code="NG")
@@ -170,6 +303,7 @@ def login_with_email(db: Session, email: str=None, password: str=None):
             'message': err,
             'data': None
         }
+
 
 def get_user_details(db: Session, user_id: int=0):
     user = get_single_user_by_id(db=db, id=user_id)
