@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database.db import get_session
-from modules.transactions.wallet import process_wallet_to_wallet_transfer, generate_virtual_account_number, transfer_funds_to_project_wallet, transfer_funds_from_project_wallet, process_bulk_wallet_to_wallet_transfer
-from database.schema import WalletTransferRequest, GenerateVirtualAccountRequest, GenerateVirtualAccountResponse, ErrorResponse, PlainResponse, ProjectWalletTransferRequest, BulkWalletTransferRequest
+from modules.transactions.wallet import process_wallet_to_wallet_transfer, generate_virtual_account_number, transfer_funds_to_project_wallet, transfer_funds_from_project_wallet, process_bulk_wallet_to_wallet_transfer, process_bulk_project_wallet_to_wallet_transfer
+from database.schema import WalletTransferRequest, GenerateVirtualAccountRequest, GenerateVirtualAccountResponse, ErrorResponse, PlainResponse, ProjectWalletTransferRequest, BulkWalletTransferRequest, BulkProjectWalletTransferRequest
 from modules.authentication.auth import auth
 
 router = APIRouter(
@@ -39,6 +39,27 @@ async def bulk_wallet_to_wallet_transfer(payload: BulkWalletTransferRequest, use
     result = process_bulk_wallet_to_wallet_transfer(
         db,
         from_user_id=payload.from_user_id,
+        transfers=transfers_data
+    )
+    if not result.get('status'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=result.get('message')
+        )
+    
+    return result
+    
+
+@router.post("/project-bulk-transfer", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+async def bulk_project_wallet_to_wallet_transfer(payload: BulkProjectWalletTransferRequest, user=Depends(auth.auth_wrapper), db: Session = Depends(get_session)):
+    """
+    Endpoint to perform multiple wallet-to-wallet transfers from a single sender to multiple recipients.
+    This operation is atomic: if any individual transfer fails, the entire bulk operation is rolled back.
+    """
+    transfers_data = [t.model_dump() for t in payload.transfers]
+    result = process_bulk_project_wallet_to_wallet_transfer(
+        db,
+        project_id=payload.project_id,
         transfers=transfers_data
     )
     if not result.get('status'):

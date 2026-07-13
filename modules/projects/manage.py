@@ -1,13 +1,28 @@
 from typing import Dict, List, Any
 from sqlalchemy.orm import Session
-from database.model import create_project, update_project, delete_project, get_single_project_by_id, get_just_single_project_by_id, get_projects, create_wallet, create_role, update_role, delete_role, get_single_role_by_id, get_just_single_role_by_id, get_roles, create_role_user, check_user_has_role, create_milestone, update_milestone, delete_milestone, force_delete_milestone, get_single_milestone_by_id, get_milestones, create_invite, update_invite, delete_invite, get_single_invite_by_id, get_invites, get_invite_by_email_and_project, get_single_user_by_email, get_just_single_user_by_id, get_just_single_invite_by_id, get_role_ids_from_roles_users_by_user_id, get_project_ids_from_roles_using_role_ids
+from database.model import create_project, update_project, delete_project, get_single_project_by_id, get_just_single_project_by_id, get_projects, create_wallet, create_role, update_role, delete_role, get_single_role_by_id, get_just_single_role_by_id, get_roles, create_role_user, check_user_has_role, create_milestone, update_milestone, delete_milestone, get_single_milestone_by_id, get_milestones, create_invite, update_invite, delete_invite, get_single_invite_by_id, get_invites, get_invite_by_email_and_project, get_single_user_by_email, get_just_single_user_by_id, get_just_single_invite_by_id, get_role_ids_from_roles_users_by_user_id, get_project_ids_from_roles_using_role_ids, get_roles_fee_sum
 from modules.utils.tools import process_schema_dictionary, process_date_string
 from modules.messaging.email import e_notification
 from fastapi_pagination.ext.sqlalchemy import paginate
 
+def extract_roles_total_fee(roles: List[Dict[str, Any]]):
+	total_fee = 0
+	if len(roles) > 0:
+		for i in range(len(roles)):
+			total_fee = total_fee + roles[i]['fee']
+	return total_fee
+
 def insert_new_project(db: Session, currency_id: int, name: str, start_date: str, end_date: str, created_by: int, total_fee: float = 0.0, description: str = None, roles: List[Dict[str, Any]] = []):
 	start_date = process_date_string(date_str=start_date)
 	end_date = process_date_string(date_str=end_date)
+	total_role_fee = extract_roles_total_fee(roles=roles)
+	if total_role_fee > 0:
+		if total_fee != total_role_fee:
+			return {
+				'status': False,
+				'message': f"Total project fee '{total_fee}' is not equal to total role fee '{total_role_fee}'",
+				'data': None,
+			}
 	project = create_project(db=db, currency_id=currency_id, name=name, start_date=start_date, end_date=end_date, created_by=created_by, total_fee=total_fee, description=description, status=1)
 	create_wallet(db=db, currency_id=currency_id, project_id=project.id, status=1)
 	if len(roles) > 0:
@@ -20,7 +35,20 @@ def insert_new_project(db: Session, currency_id: int, name: str, start_date: str
 	}
 
 def update_existing_project(db: Session, id: int=0, values: Dict={}):
+	project = get_just_single_project_by_id(db=db, id=id)
+	if project is None:
+		return {
+			'status': False,
+			'message': 'Success',
+		}
 	values = process_schema_dictionary(info=values)
+	if 'total_fee' in values:
+		project_role_fees = get_roles_fee_sum(db=db, filters={'project_id': id, 'status': 1})
+		if project_role_fees > values['total_fee']:
+			return {
+				'status': False,
+				'message': 'Total fee cannot be lower than total role fees',
+			}
 	update_project(db=db, id=id, values=values)
 	return {
 		'status': True,
@@ -77,6 +105,14 @@ def insert_new_role(db: Session, user_id: int, project_id: int, name: str, fee: 
 				'data': None
 		}
 		else:
+			roles_total_fee = get_roles_fee_sum(db=db, filters={'project_id': project_id, 'status': 1})
+			roles_total_fee = roles_total_fee + fee
+			if project.total_fee < roles_total_fee:
+				return {
+					'status': False,
+					'message': 'Role amount exceed total project fee',
+					'data': None,
+				}
 			role = create_role(db=db, project_id=project_id, name=name, fee=fee, description=description, icon=icon, status=1)
 			return {
 				'status': True,
@@ -100,6 +136,15 @@ def insert_multiple_new_role(db: Session, user_id: int, project_id: int, roles: 
 				'data': None
 		}
 		else:
+			extracted_fee = extract_roles_total_fee(roles=roles)
+			roles_total_fee = get_roles_fee_sum(db=db, filters={'project_id': project_id, 'status': 1})
+			roles_total_fee = roles_total_fee + extracted_fee
+			if project.total_fee < roles_total_fee:
+				return {
+					'status': False,
+					'message': 'Roles amount exceed total project fee',
+					'data': None,
+				}
 			resp_roles = []
 			if len(roles) > 0:
 				for i in range(len(roles)):

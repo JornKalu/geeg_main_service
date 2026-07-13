@@ -14,7 +14,7 @@ from models.milestones import Milestone, create_milestone, update_milestone, del
 from models.password_resets import Password_Reset, create_password_reset, update_password_reset, delete_password_reset, force_delete_password_reset, get_single_password_reset_by_id, get_password_reset_by_token, get_password_resets
 from models.profiles import Profile, create_profile, update_profile, update_profile_by_user_id, delete_profile, force_delete_profile, get_single_profile_by_id, get_single_profile_by_user_id, get_profiles
 from models.projects import Project, create_project, update_project, delete_project, force_delete_project, get_single_project_by_id, get_just_single_project_by_id, get_projects
-from models.roles import Role, create_role, update_role, delete_role, force_delete_role, get_single_role_by_id, get_just_single_role_by_id, get_roles_by_project, get_roles, get_project_ids_from_roles_using_role_ids
+from models.roles import Role, create_role, update_role, delete_role, force_delete_role, get_single_role_by_id, get_just_single_role_by_id, get_roles_by_project, get_roles, get_project_ids_from_roles_using_role_ids, get_roles_fee_sum
 from models.roles_users import Role_User, create_role_user, update_role_user, delete_role_user, force_delete_role_user, get_single_role_user_by_id, get_roles_users, get_role_ids_from_roles_users_by_user_id, check_user_has_role
 from models.social_accounts import Social_Account, create_social_account, update_social_account, delete_social_account, force_delete_social_account, get_single_social_account_by_id, get_social_account_by_provider, get_social_accounts
 from models.staffs import Staff, create_staff, update_staff, delete_staff, force_delete_staff, get_single_staff_by_id, get_staff_by_user_id, get_staffs

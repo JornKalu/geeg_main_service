@@ -134,3 +134,17 @@ def get_project_ids_from_roles_using_role_ids(db: Session, role_ids: list[int]):
         )
     )
     return db.execute(stmt).scalars().all()
+
+def get_roles_fee_sum(db: Session, filters: Dict = {}) -> float:
+    query = db.query(func.sum(Role.fee)).filter(Role.deleted_at == None)
+    
+    if 'project_id' in filters:
+        query = query.filter_by(project_id=filters['project_id'])
+        
+    if 'status' in filters:
+        query = query.filter_by(status=filters['status'])
+        
+    if 'name' in filters:
+        query = query.filter(Role.name.ilike(f"%{filters['name']}%"))
+        
+    return query.scalar() or 0.0

@@ -91,6 +91,10 @@ class BulkWalletTransferRequest(BaseModel):
     from_user_id: int = Field(..., description="The ID of the sender for all transfers")
     transfers: List[BulkWalletTransferItem] = Field(..., min_length=1, description="List of individual transfers")
 
+class BulkProjectWalletTransferRequest(BaseModel):
+    project_id: int = Field(..., description="The ID of the project for all transfers")
+    transfers: List[BulkWalletTransferItem] = Field(..., min_length=1, description="List of individual transfers")
+
 class BankAccountModel(BaseModel):
     id: int
     user_id: int

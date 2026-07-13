@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from database.model import get_wallet_by_user_id, update_wallet, create_transaction, get_just_single_user_by_id, get_single_profile_by_user_id, get_wallet_by_project_id, get_just_single_project_by_id, get_single_wallet_by_id
+from database.model import get_wallet_by_user_id, update_wallet, create_transaction, get_just_single_user_by_id, get_single_profile_by_user_id, get_wallet_by_project_id, get_just_single_project_by_id, get_single_wallet_by_id, get_wallet_by_project_id
 from modules.external.korapay import create_virtual_bank_account # Assuming this is an external API call
 from modules.utils.tools import generate_transaction_reference
 from typing import Dict, Any, List
@@ -82,7 +82,7 @@ def process_bulk_wallet_to_wallet_transfer(db: Session, from_user_id: int, trans
     # Retrieve sender wallet once
     sender_wallet = get_wallet_by_user_id(db, user_id=from_user_id)
     if not sender_wallet:
-        return {'status': False, 'message': f'Sender wallet not found for user_id: {from_user_id}', 'data': None}
+        return {'status': False, 'message': f'Sender wallet not found for user: {from_user_id}', 'data': None}
 
     # Pre-check total amount and individual recipient wallets
     total_amount_to_transfer = sum(t['amount'] for t in transfers)
@@ -146,6 +146,95 @@ def process_bulk_wallet_to_wallet_transfer(db: Session, from_user_id: int, trans
                 'from_wallet_id': sender_wallet.id,
                 'to_wallet_id': receiver_wallet.id,
                 'narration': narration if narration else f"Bulk transfer from {from_user_id} to {to_user_id}",
+                'from_wallet_previous_balance': from_prev_bal,
+                'from_wallet_new_balance': from_new_bal,
+                'to_wallet_previous_balance': to_prev_bal,
+                'to_wallet_new_balance': to_new_bal,
+                'status': 'completed'
+            }
+
+            transaction = create_transaction(
+                db=db,
+                transaction_type='wallet_transfer',
+                reference=reference,
+                amount=amount,
+                total_amount=amount,
+                values=transaction_data,
+                commit=False
+            )
+            results.append({'status': True, 'message': 'Transfer successful', 'data': transaction, 'transfer_index': i})
+
+        return {'status': True, 'message': 'All bulk transfers processed successfully', 'data': results}
+
+    except Exception as e:
+        # The FastAPI dependency `get_session` will handle the rollback if an exception is raised.
+        return {'status': False, 'message': f'Bulk transfer failed: {str(e)}', 'data': results}
+    
+
+def process_bulk_project_wallet_to_wallet_transfer(db: Session, project_id: int, transfers: List[Dict[str, Any]]):
+    """
+    Handles transferring funds from one user's wallet to multiple other users' wallets in a bulk operation.
+    The entire operation is atomic: if any transfer fails, all transfers are rolled back.
+    """
+    results = []
+    
+    sender_wallet = get_wallet_by_project_id(db, user_id=project_id)
+    if not sender_wallet:
+        return {'status': False, 'message': f'Sender wallet not found for project: {project_id}', 'data': None}
+
+    total_amount_to_transfer = sum(t['amount'] for t in transfers)
+    if float(sender_wallet.balance) < total_amount_to_transfer:
+        return {'status': False, 'message': 'Insufficient total balance in sender wallet for all transfers', 'data': None}
+
+    receiver_ids = [t['to_user_id'] for t in transfers]
+    receiver_wallets = {w.user_id: w for w in db.query(get_wallet_by_user_id(db, user_id=uid) for uid in receiver_ids if get_wallet_by_user_id(db, user_id=uid) is not None)}
+
+    try:
+        current_sender_balance = float(sender_wallet.balance)
+
+        for i, transfer_item in enumerate(transfers):
+            to_user_id = transfer_item['to_user_id']
+            amount = transfer_item['amount']
+            narration = transfer_item.get('narration')
+
+            if amount <= 0:
+                results.append({'status': False, 'message': f'Transfer amount for recipient {to_user_id} must be greater than zero', 'transfer_index': i})
+                raise ValueError(f'Invalid amount for transfer {i}') # Rollback entire operation
+
+            receiver_wallet = receiver_wallets.get(to_user_id)
+            if not receiver_wallet:
+                results.append({'status': False, 'message': f'Receiver wallet not found for user_id: {to_user_id}', 'transfer_index': i})
+                raise ValueError(f'Receiver wallet not found for transfer {i}') # Rollback entire operation
+
+            if sender_wallet.currency_id != receiver_wallet.currency_id:
+                results.append({'status': False, 'message': f'Currency mismatch for transfer to {to_user_id}', 'transfer_index': i})
+                raise ValueError(f'Currency mismatch for transfer {i}') # Rollback entire operation
+
+            # Check sender balance for this specific transfer (cumulative check already done)
+            if current_sender_balance < amount:
+                results.append({'status': False, 'message': f'Insufficient balance for transfer to {to_user_id}', 'transfer_index': i})
+                raise ValueError(f'Insufficient balance for transfer {i}') # Rollback entire operation
+
+            # Update balances
+            from_prev_bal = current_sender_balance
+            from_new_bal = current_sender_balance - amount
+            to_prev_bal = float(receiver_wallet.balance)
+            to_new_bal = to_prev_bal + amount
+
+            update_wallet(db, id=sender_wallet.id, values={'balance': from_new_bal}, commit=False)
+            update_wallet(db, id=receiver_wallet.id, values={'balance': to_new_bal}, commit=False)
+
+            # Update current sender balance for next iteration
+            current_sender_balance = from_new_bal
+
+            # Create transaction record
+            reference = generate_transaction_reference(tran_type="bulk_wallet_transfer")
+            transaction_data = {
+                'from_user_id': sender_wallet.user_id,
+                'to_user_id': to_user_id,
+                'from_wallet_id': sender_wallet.id,
+                'to_wallet_id': receiver_wallet.id,
+                'narration': narration if narration else f"Bulk transfer from {project_id} to {to_user_id}",
                 'from_wallet_previous_balance': from_prev_bal,
                 'from_wallet_new_balance': from_new_bal,
                 'to_wallet_previous_balance': to_prev_bal,
