@@ -5,7 +5,6 @@ from sqlalchemy.sql import func
 from sqlalchemy.sql.schema import ForeignKey
 from database.db import Base, get_laravel_datetime
 
-from .users import User
 from .roles import Role
 from .roles_users import Role_User
 
@@ -132,6 +131,7 @@ def force_delete_project(db: Session, id: int = 0, commit: bool = False):
 
 
 def get_single_project_by_id(db: Session, id: int = 0):
+    from .users import User
     return db.query(Project).options(
         selectinload(Project.currency),
         selectinload(Project.wallet),
@@ -144,6 +144,7 @@ def get_just_single_project_by_id(db: Session, id: int = 0):
     return db.query(Project).filter_by(id=id).first()
 
 def get_projects(db: Session, filters: Dict = {}):
+    from .users import User
     query = db.query(Project).options(
         selectinload(Project.currency),
         selectinload(Project.wallet),

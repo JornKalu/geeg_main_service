@@ -6,7 +6,7 @@ from sqlalchemy.sql.schema import ForeignKey
 from database.db import Base, get_laravel_datetime
 
 from .roles_users import Role_User
-from .users import User
+
 
 class Role(Base):
     __tablename__ = "roles"
@@ -95,6 +95,7 @@ def force_delete_role(db: Session, id: int = 0, commit: bool = False):
 
 
 def get_single_role_by_id(db: Session, id: int = 0):
+    from .users import User
     return db.query(Role).options(selectinload(Role.role_users).selectinload(Role_User.user).selectinload(User.profile)).filter_by(id=id).first()
 
 def get_just_single_role_by_id(db: Session, id: int = 0):
@@ -111,6 +112,7 @@ def get_roles_by_project(db: Session, project_id: int):
 
 
 def get_roles(db: Session, filters: Dict = {}):
+    from .users import User
     query = db.query(Role).options(selectinload(Role.role_users).selectinload(Role_User.user).selectinload(User.profile)).filter(Role.deleted_at == None)
     
     if 'project_id' in filters:
