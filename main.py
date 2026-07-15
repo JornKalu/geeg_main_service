@@ -20,6 +20,7 @@ from routers import webhook
 from routers.miscellaneous import globe
 from routers.authentication import auth
 from routers.user import pro
+from routers.user import list
 from routers.project import man
 from routers.transaction import wall
 from routers.transaction import ban
@@ -31,6 +32,7 @@ app = FastAPI(title="Geeg Main API Service")
 app.include_router(globe.router)
 app.include_router(auth.router)
 app.include_router(pro.router)
+app.include_router(list.router)
 app.include_router(man.router)
 app.include_router(wall.router)
 app.include_router(ban.router)

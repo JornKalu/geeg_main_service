@@ -48,6 +48,23 @@ class WalletModel(BaseModel):
     class Config:
         orm_mode = True
 
+
+class UserProjectModel(BaseModel):
+	id: int
+	currency_id: Optional[int] = None
+	name: Optional[str] = None
+	description: Optional[str] = None
+	start_date: Optional[datetime] = None
+	end_date: Optional[datetime] = None
+	total_fee: Optional[float] = None
+	status: Optional[int] = None
+	created_by: Optional[int] = None
+	created_at: Optional[datetime] = None
+
+	class Config:
+		orm_mode = True
+
+
 # class StaffModel(BaseModel):
 #     id: int
 #     user_id: int
@@ -68,6 +85,7 @@ class WalletModel(BaseModel):
 
 class UserModel(BaseModel):
     id: int
+    username: Optional[str] = None
     email: Optional[str] = None
     status: Optional[int] = 0
     created_at: Optional[datetime] = None
@@ -77,10 +95,26 @@ class UserModel(BaseModel):
 
 class UserMainModel(BaseModel):
     id: int
+    username: Optional[str] = None
     email: Optional[str] = None
     status: Optional[int] = 0
     profile: Optional[ProfileModel] = None
     created_at: Optional[datetime] = None
+    
+    class Config:
+        orm_mode = True
+
+class UserDataModel(BaseModel):
+    id: int
+    username: Optional[str] = None
+    email: Optional[str] = None
+    status: Optional[int] = 0
+    profile: Optional[ProfileModel] = None
+    projects: Optional[List[UserProjectModel]] = None
+    status: Optional[int] = None
+    created_at: Optional[datetime] = None
+    total_projects_involved: Optional[int] = None
+    total_amount_made: Optional[float] = None
     
     class Config:
         orm_mode = True
@@ -124,6 +158,14 @@ class UserMainResponseModel(BaseModel):
     status: bool
     message: str
     data: Optional[UserMainModel] = None
+    
+    class Config:
+        orm_mode = True
+
+class UserDataResponseModel(BaseModel):
+    status: bool
+    message: str
+    data: Optional[UserDataModel] = None
     
     class Config:
         orm_mode = True

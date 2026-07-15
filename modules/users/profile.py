@@ -1,7 +1,7 @@
 from typing import Dict
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
-from database.model import update_profile_by_user_id
+from database.model import update_profile_by_user_id, get_single_user_by_id, get_users
 from modules.utils.tools import process_schema_dictionary, process_date_string_to_laravel
 from modules.utils.net import process_phone_number
 from modules.utils.files import upload_request_file_to_cloudinary
@@ -56,3 +56,22 @@ def update_user_profile_details(db: Session, avatar: UploadFile, banner: UploadF
 		'status': True,
 		'message': 'Success',
 	}
+
+def retrieve_users(db: Session, filters: Dict={}):
+	data = get_users(db=db, filters=filters)
+	return paginate(data)
+
+def retrieve_single_user(db: Session, id: int=0):
+	user = get_single_user_by_id(db=db, id=id)
+	if user is None:
+		return {
+			'status': False,
+			'message': 'User not found',
+			'data': None
+		}
+	else:
+		return {
+			'status': True,
+			'message': 'Success',
+			'data': user
+		}

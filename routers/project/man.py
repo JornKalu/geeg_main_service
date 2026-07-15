@@ -32,7 +32,7 @@ async def delete(request: Request, user=Depends(auth.auth_wrapper), db: Session 
     return delete_existing_project(db=db, id=project_id)
 
 @router.get("/", response_model=Page[ProjectModel], responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
-async def get_all(request: Request, db: Session = Depends(get_db), user=Depends(auth.auth_wrapper), name: str = Query(None), currency_id: str = Query(None), status: int = Query(None), active: int = Query(None)):
+async def get_all(request: Request, db: Session = Depends(get_db), user=Depends(auth.auth_wrapper), name: str = Query(None), currency_id: int = Query(None), status: int = Query(None), active: int = Query(None)):
     filters = {}
     if name:
         filters['name'] = name

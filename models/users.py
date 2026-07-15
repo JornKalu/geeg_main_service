@@ -1,9 +1,14 @@
 from typing import Dict
-from sqlalchemy import Column, String, BigInteger, SmallInteger, DateTime, CheckConstraint, desc
-from sqlalchemy.orm import Session, joinedload, selectinload, relationship
+from sqlalchemy import Column, String, BigInteger, SmallInteger, DateTime, CheckConstraint, desc, select
+from sqlalchemy.orm import Session, joinedload, selectinload, relationship, column_property
 from sqlalchemy.sql import func
+from sqlalchemy.sql.expression import and_, or_
 from database.db import Base, get_laravel_datetime
 
+from .projects import Project
+from .roles import Role
+from .roles_users import Role_User
+from .transactions import Transaction
 
 class User(Base):
     __tablename__ = "users"
@@ -46,6 +51,40 @@ class User(Base):
         uselist=True, 
         primaryjoin="User.id == Project.created_by",
         lazy="selectin"
+    )
+
+    total_projects_involved = column_property(
+        select(func.count(Project.id))
+        .where(
+            and_(
+                Project.deleted_at.is_(None),
+                or_(
+                    Project.created_by == id,
+                    Project.id.in_(
+                        select(Role.project_id)
+                        .join(Role_User, Role_User.role_id == Role.id)
+                        .where(
+                            Role_User.user_id == id,
+                            Role_User.deleted_at.is_(None),
+                            Role_User.status == 1,
+                            Role.deleted_at.is_(None),
+                            Role.status == 1
+                        )
+                    )
+                )
+            )
+        ).correlate_except(Project).scalar_subquery()
+    )
+
+    total_amount_made = column_property(
+        select(func.coalesce(func.sum(Transaction.amount), 0))
+        .where(
+            and_(
+                Transaction.to_user_id == id,
+                Transaction.deleted_at.is_(None),
+                Transaction.status == 'completed'
+            )
+        ).correlate_except(Transaction).scalar_subquery()
     )
 
 def create_user(db: Session, email: str, password: str, pin: str = None, username: str = None, phone_number: str = None, user_type: int = 1, status: int = 1, commit: bool = False):
@@ -101,10 +140,10 @@ def force_delete_user(db: Session, id: int = 0, commit: bool = False):
     return True
 
 def get_single_user_by_id(db: Session, id: int = 0):
-    return db.query(User).filter_by(id=id).first()
+    return db.query(User).options(selectinload(User.profile), selectinload(User.projects)).filter_by(id=id, deleted_at=None).first()
 
 def get_just_single_user_by_id(db: Session, id: int = 0):
-    return db.query(User).filter_by(id=id).first()
+    return db.query(User).filter_by(id=id, deleted_at=None).first()
 
 def get_single_user_by_email(db: Session, email: str):
     return db.query(User).filter_by(email=email, deleted_at=None).first()
@@ -116,7 +155,7 @@ def get_single_user_by_phone_number(db: Session, phone_number: str):
     return db.query(User).filter_by(phone_number=phone_number, deleted_at=None).first()
 
 def get_users(db: Session, filters: Dict = {}):
-    query = db.query(User).filter(User.deleted_at == None)
+    query = db.query(User).options(selectinload(User.profile), selectinload(User.projects)).filter(User.deleted_at == None)
     
     if 'username' in filters:
         query = query.filter(User.username.ilike(f"%{filters['username']}%"))

@@ -9,7 +9,7 @@ import dateparser
 import time
 from settings.config import load_env_config
 from database.db import get_session, get_db
-from database.model import get_single_user_by_id
+from database.model import get_just_single_user_by_id
 from sqlalchemy.orm import Session
 import hashlib
 import json
@@ -75,7 +75,7 @@ class AuthHandler():
             # user_id = sub_data['id']
             user_id = int(payload['sub'])
 
-            user = get_single_user_by_id(db=db, id=user_id)
+            user = get_just_single_user_by_id(db=db, id=user_id)
             if user is None:
                 raise HTTPException(status_code=401, detail='User does not exist')
             
