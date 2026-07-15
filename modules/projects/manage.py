@@ -329,7 +329,7 @@ def send_invite(db: Session, user_id: int=0, project_id: int=0, role_id: int=0, 
 			if project.created_by != user_id:
 				return {
 					'status': False,
-					'message': f'Only project creator can send invites, {project.created_by} {user_id}',
+					'message': f'Only project creator can send invites {project.created_by} {user_id}',
 					'data': None
 				}
 			else:

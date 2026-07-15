@@ -116,7 +116,7 @@ async def milestones_get_single(request: Request, db: Session = Depends(get_db),
 
 @router.post("/invites/send", response_model=InviteResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def invites_send(request: Request, fields: SendInviteModel, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
-    req = send_invite(db=db, project_id=fields.project_id, role_id=fields.role_id, email=fields.email, full_name=fields.full_name, message=fields.message)
+    req = send_invite(db=db, user_id=user['id'], project_id=fields.project_id, role_id=fields.role_id, email=fields.email, full_name=fields.full_name, message=fields.message)
     return req
 
 @router.post("/invites/accept", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
