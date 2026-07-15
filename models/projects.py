@@ -140,10 +140,10 @@ def get_single_project_by_id(db: Session, id: int = 0):
         selectinload(Project.milestones),
         selectinload(Project.creator).selectinload(User.profile),
         selectinload(Project.roles).selectinload(Role.role_users).selectinload(Role_User.user).selectinload(User.profile),
-    ).filter_by(id=id).first()
+    ).filter_by(id=id, deleted_at=None).first()
 
 def get_just_single_project_by_id(db: Session, id: int = 0):
-    return db.query(Project).filter_by(id=id).first()
+    return db.query(Project).filter_by(id=id, deleted_at=None).first()
 
 def get_projects(db: Session, filters: Dict = {}):
     from .users import User
