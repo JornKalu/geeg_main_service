@@ -4,14 +4,22 @@ from datetime import datetime, date
 
 class ProfileModel(BaseModel):
     id: int
+    country_id: Optional[int] = None
+    industry_id: Optional[int] = None
+    category_id: Optional[int] = None
     user_id: Optional[int] = None
     first_name: Optional[str] = None
-    # other_name: Optional[str] = None
+    other_name: Optional[str] = None
     last_name: Optional[str] = None
     date_of_birth: Optional[date] = None
     gender: Optional[str] = None
     social_security: Optional[str] = None
     avatar: Optional[str] = None
+    banner: Optional[str] = None
+    location: Optional[str] = None
+    bio: Optional[str] = None
+    nin: Optional[str] = None
+    bvn: Optional[str] = None
     
     class Config:
         orm_mode = True
