@@ -14,7 +14,9 @@ router = APIRouter(
 
 @router.get("/", response_model=Page[UserDataModel], responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def get_all(request: Request, db: Session = Depends(get_db), user=Depends(auth.auth_wrapper), username: str = Query(None), email: str = Query(None), status: int = Query(None), active: int = Query(None)):
-    filters = {}
+    filters = {
+        'user_type': 1
+    }
     if username:
         filters['name'] = username
     if email:
