@@ -82,7 +82,7 @@ class User(Base):
             and_(
                 Transaction.to_user_id == id,
                 Transaction.deleted_at.is_(None),
-                Transaction.status == 'completed'
+                Transaction.status == 1
             )
         ).correlate_except(Transaction).scalar_subquery()
     )

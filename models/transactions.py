@@ -1,5 +1,5 @@
 from typing import Dict
-from sqlalchemy import Column, String, BigInteger, Text, DateTime, DECIMAL, CheckConstraint, desc, and_, or_
+from sqlalchemy import Column, String, BigInteger, Text, DateTime, DECIMAL, CheckConstraint, desc, and_, or_, SmallInteger
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
@@ -34,7 +34,7 @@ class Transaction(Base):
     to_wallet_previous_balance = Column(DECIMAL(15, 2), nullable=True)
     to_wallet_new_balance = Column(DECIMAL(15, 2), nullable=True)
     
-    status = Column(String(50), default='pending') # pending, completed, failed, reversed
+    status = Column(SmallInteger, default=0) # 0 = pending, 1 = completed, 2 = failed, 3 = reversed
     meta_data = Column(JSONB, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
