@@ -2,7 +2,7 @@ from typing import Dict
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 from database.model import update_profile_by_user_id
-from modules.utils.tools import process_schema_dictionary
+from modules.utils.tools import process_schema_dictionary, process_date_string_to_laravel
 from modules.utils.net import process_phone_number
 from modules.utils.files import upload_request_file_to_cloudinary
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -46,7 +46,7 @@ def update_user_profile_details(db: Session, avatar: UploadFile, banner: UploadF
 	if gender is not None:
 		pro_values['gender'] = gender
 	if date_of_birth is not None:
-		pro_values['date_of_birth'] = date_of_birth
+		pro_values['date_of_birth'] = process_date_string_to_laravel(date_str=date_of_birth)
 	if location is not None:
 		pro_values['location'] = location
 	if bio is not None:

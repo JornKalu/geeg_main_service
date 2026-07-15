@@ -159,6 +159,16 @@ def process_datetime_string_to_laravel(time_str: str = None):
         else:
             return None
 
+def process_date_string_to_laravel(date_str: str = None):
+    if date_str is None:
+        return None
+    else:
+        dt = dateparser.parse(str(date_str))
+        if dt is not None:
+            return dt.strftime('%Y-%m-%d')
+        else:
+            return None
+
 def get_current_date_laravel_formatted():
     return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 

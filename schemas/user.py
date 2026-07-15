@@ -1,6 +1,6 @@
 from typing import Optional, List
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, date
 
 class ProfileModel(BaseModel):
     id: int
@@ -8,7 +8,7 @@ class ProfileModel(BaseModel):
     first_name: Optional[str] = None
     # other_name: Optional[str] = None
     last_name: Optional[str] = None
-    date_of_birth: Optional[str] = None
+    date_of_birth: Optional[date] = None
     gender: Optional[str] = None
     social_security: Optional[str] = None
     avatar: Optional[str] = None
