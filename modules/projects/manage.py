@@ -340,7 +340,7 @@ def send_invite(db: Session, user_id: int=0, project_id: int=0, role_id: int=0, 
 						'data': None,
 					}
 				else:
-					recipient_user_id = 0
+					recipient_user_id = None
 					recipient_user = get_single_user_by_email(db=db, email=email)
 					if recipient_user is not None:
 						recipient_user_id = recipient_user.id
