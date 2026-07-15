@@ -60,7 +60,9 @@ class Project(Base):
 
     creator = relationship(
         "User",
-        back_populates="projects"
+        primaryjoin="User.id == Project.created_by",
+        foreign_keys="Project.created_by",
+        lazy="selectin"
     )
 
     @property

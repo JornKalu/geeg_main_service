@@ -47,9 +47,9 @@ class User(Base):
     )
 
     projects = relationship(
-        "Project", 
-        uselist=True, 
-        primaryjoin="User.id == Project.created_by",
+        "Project",
+        primaryjoin="or_(User.id == Project.created_by, User.id.in_(select(Role_User.user_id).join(Role, Role_User.role_id == Role.id).where(Role.project_id == Project.id)))",
+        viewonly=True,
         lazy="selectin"
     )
 
