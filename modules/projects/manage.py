@@ -312,7 +312,7 @@ def retrieve_single_milestone(db: Session, id: int=0):
 
 
 def send_invite(db: Session, user_id: int=0, project_id: int=0, role_id: int=0, email: str=None, full_name: str=None, message: str=None):
-	role = get_just_single_role_by_id(db=db, id=id)
+	role = get_just_single_role_by_id(db=db, id=role_id)
 	if role is None:
 		return {
 			'status': False,
