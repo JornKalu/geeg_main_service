@@ -32,15 +32,17 @@ async def delete(request: Request, user=Depends(auth.auth_wrapper), db: Session 
     return delete_existing_project(db=db, id=project_id)
 
 @router.get("/", response_model=Page[ProjectModel], responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
-async def get_all(request: Request, db: Session = Depends(get_db), user=Depends(auth.auth_wrapper), name: str = Query(None), currency_id: int = Query(None), status: int = Query(None), active: int = Query(None)):
+async def get_all(request: Request, db: Session = Depends(get_db), user=Depends(auth.auth_wrapper), name: str = Query(None), currency_id: int = Query(None), user_id: int = Query(None), status: int = Query(None), active: int = Query(None)):
     filters = {}
+    if user_id is None:
+        user_id = 0
     if name:
         filters['name'] = name
     if currency_id:
         filters['currency_id'] = currency_id
     if status:
         filters['status'] = status
-    return retrieve_projects(db=db, filters=filters, user_id=user['id'], active=active)
+    return retrieve_projects(db=db, filters=filters, user_id=user_id, active=active)
 
 @router.get("/get_single/{project_id}", response_model=ProjectResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def get_single(request: Request, db: Session = Depends(get_db), user=Depends(auth.auth_wrapper), project_id: int = 0):

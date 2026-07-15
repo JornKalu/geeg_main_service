@@ -63,14 +63,14 @@ def delete_existing_project(db: Session, id: int=0):
 	}
 
 def retrieve_projects(db: Session, filters: Dict={}, user_id: int=0, active: int = 0):
-	if active == 0:
-		filters['created_by'] = user_id
-	else:
+	if active == 1:
 		role_ids = get_role_ids_from_roles_users_by_user_id(db=db, user_id=user_id)
 		if len(role_ids) > 0:
 			project_ids = get_project_ids_from_roles_using_role_ids(db=db, role_ids=role_ids)
 			if len(project_ids) > 0:
 				filters['ids'] = project_ids
+	elif user_id > 0:
+		filters['created_by'] = user_id
 	data = get_projects(db=db, filters=filters)
 	return paginate(data)
 
