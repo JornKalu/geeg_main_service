@@ -61,6 +61,11 @@ def generate_transaction_reference(tran_type: str = None, rand_type: int = 1, ra
     
     return f"{prefix}_{ts}_{random_part}"
 
+def generate_va_reference(wallet_id: int):
+    random_part = uuid.uuid4().hex[:7]
+    return f"VA_WLT_{wallet_id}{random_part}"
+
+
 def generate_basic_reference(rand_size: int=10):
     dt = datetime.now()
     ts = datetime.timestamp(dt)

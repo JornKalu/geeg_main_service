@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from database.model import get_wallet_by_user_id, update_wallet, create_transaction, get_just_single_user_by_id, get_single_profile_by_user_id, get_wallet_by_project_id, get_just_single_project_by_id, get_single_wallet_by_id, get_wallet_by_project_id
 from modules.external.korapay import create_virtual_bank_account # Assuming this is an external API call
-from modules.utils.tools import generate_transaction_reference
+from modules.utils.tools import generate_transaction_reference, generate_va_reference
 from typing import Dict, Any, List
 
 
@@ -280,7 +280,7 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
     customer_nin = None
     
     # Using the wallet ID ensures this reference is universally unique to the ledger
-    account_reference = f"VA_WLT_{wallet.id}"
+    account_reference = generate_va_reference(wallet_id=wallet_id)
 
     # 3. Branching Logic: Who owns this wallet?
     if wallet.user_id:
