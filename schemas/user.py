@@ -43,6 +43,10 @@ class WalletModel(BaseModel):
     user_id: Optional[int] = None
     project_id: Optional[int] = None
     balance: Optional[float] = None
+    account_name: Optional[str] = None
+    account_number: Optional[str] = None
+    bank_name: Optional[str] = None
+    bank_code: Optional[str] = None
     # currency: Optional[WalletCurrencyModel] = None
     
     class Config:
