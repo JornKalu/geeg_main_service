@@ -336,7 +336,7 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
         return {
             'status': False,
             'message': response.get('message', 'Failed to create virtual account'),
-            'data': response.get('data')
+            # 'data': response.get('data')
         }
 
     resp_data = response.get('data', {})
