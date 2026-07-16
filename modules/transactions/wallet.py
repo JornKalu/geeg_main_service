@@ -332,15 +332,13 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
     # 4. Call KoraPay API
     response = create_virtual_bank_account(account_reference=account_reference, account_name=customer_name, customer_full_name=customer_name, customer_email=customer_email, customer_bvn=customer_bvn, customer_nin=customer_nin, permanent=True)
 
-    return response
-
-    if not response.get('status'):
+    if response['status_code'] != 200:
         return {
             'status': False,
             'message': response.get('message', 'Failed to create virtual account'),
             'data': response.get('data')
         }
-    
+
     resp_data = response.get('data', {})
     if resp_data['status'] == False:
         return {
