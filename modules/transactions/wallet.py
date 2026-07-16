@@ -265,119 +265,110 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
     Generates a KoraPay virtual account for a specific wallet, 
     dynamically resolving KYC for either Users or Projects.
     """
-    try:
-        # 1. Start with the Wallet
-        wallet = get_single_wallet_by_id(db, id=wallet_id)
-        if not wallet:
-            return {'status': False, 'message': 'Wallet not found', 'data': None}
-        
-        if wallet.is_generated == 1:
-            return {'status': False, 'message': 'Account already generated', 'data': None}
-
-        # 2. Initialize our KoraPay payload variables
-        customer_name = ""
-        customer_email = ""
-        customer_bvn = ""
-        kyc_data = {}
-        
-        # Using the wallet ID ensures this reference is universally unique to the ledger
-        account_reference = f"VA_WLT_{wallet.id}"
-
-        # 3. Branching Logic: Who owns this wallet?
-        if wallet.user_id:
-            # --- USER WALLET LOGIC ---
-            user = get_just_single_user_by_id(db=db, id=wallet.user_id)
-            profile = get_single_profile_by_user_id(db=db, user_id=wallet.user_id)
-            
-            if not user or not profile:
-                return {'status': False, 'message': 'User or Profile data missing'}
-                
-            if not profile.bvn:
-                return {'status': False, 'message': 'Please add BVN to generate an account'}
-
-            customer_name = f"{profile.first_name} {profile.last_name}"
-            customer_email = user.email
-            kyc_data['bvn'] = profile.bvn
-            customer_bvn = profile.bvn
-            if profile.nin:
-                kyc_data['nin'] = profile.nin
-
-        elif wallet.project_id:
-            # --- PROJECT WALLET LOGIC ---
-            project = get_just_single_project_by_id(db=db, id=wallet.project_id)
-            if not project:
-                return {'status': False, 'message': 'Project not found'}
-                
-            # KoraPay requires a human/business name and email. 
-            # If your 'Project' has its own email/name, use it. Otherwise, fallback to the project creator.
-            project_owner = get_just_single_user_by_id(db=db, id=project.created_by) 
-            owner_profile = get_single_profile_by_user_id(db=db, user_id=project.created_by)
-            
-            if not owner_profile.bvn:
-                return {'status': False, 'message': 'Project owner must add BVN to generate a project account'}
-
-            customer_name = f"{owner_profile.first_name} {owner_profile.last_name}"
-            customer_email = project_owner.email
-            
-            # For NGN Virtual Accounts, Kora usually requires the individual's BVN unless it's a registered business (RC Number)
-            kyc_data['bvn'] = owner_profile.bvn 
-            customer_bvn = owner_profile.bvn 
-
-        else:
-            # Wallet has neither user_id nor project_id (Orphaned wallet)
-            return {'status': False, 'message': 'Invalid wallet ownership structure'}
-
-        # 4. Construct the final Kora Payload
-        customer = {
-            "name": customer_name,
-            "email": customer_email
-        }
+    # 1. Start with the Wallet
+    wallet = get_single_wallet_by_id(db, id=wallet_id)
+    if not wallet:
+        return {'status': False, 'message': 'Wallet not found', 'data': None}
     
+    if wallet.is_generated == 1:
+        return {'status': False, 'message': 'Account already generated', 'data': None}
 
-        # 5. Call KoraPay API
-        response = create_virtual_bank_account(account_reference=account_reference, account_name=customer_name, customer_full_name=customer_name, customer_email=customer_email, customer_bvn=customer_bvn, permanent=True)
+    # 2. Initialize our KoraPay payload variables
+    customer_name = ""
+    customer_email = ""
+    customer_bvn = ""
+    kyc_data = {}
+    
+    # Using the wallet ID ensures this reference is universally unique to the ledger
+    account_reference = f"VA_WLT_{wallet.id}"
 
-        if not response.get('status'):
-            return {
-                'status': False,
-                'message': response.get('message', 'Failed to create virtual account'),
-                'data': response.get('data')
-            }
+    # 3. Branching Logic: Who owns this wallet?
+    if wallet.user_id:
+        # --- USER WALLET LOGIC ---
+        user = get_just_single_user_by_id(db=db, id=wallet.user_id)
+        profile = get_single_profile_by_user_id(db=db, user_id=wallet.user_id)
+        
+        if not user or not profile:
+            return {'status': False, 'message': 'User or Profile data missing'}
+            
+        if not profile.bvn:
+            return {'status': False, 'message': 'Please add BVN to generate an account'}
 
-        va_data = response.get('data', {})
+        customer_name = f"{profile.first_name} {profile.last_name}"
+        customer_email = user.email
+        kyc_data['bvn'] = profile.bvn
+        customer_bvn = profile.bvn
+        if profile.nin:
+            kyc_data['nin'] = profile.nin
 
-        # 6. Update the wallet with the new Virtual Account details
-        # commit=False keeps it in the active session for get_db() to commit at the end of the request
-        update_wallet(
-            db=db, 
-            id=wallet.id, 
-            values={
-                'account_name': va_data.get('account_name'),
-                'account_number': va_data.get('account_number'),
-                'bank_name': va_data.get('bank_name'),
-                'bank_code': va_data.get('bank_code'),
-                'external_reference': account_reference,
-                'is_generated': 1
-            },
-            commit=False 
-        )
+    elif wallet.project_id:
+        # --- PROJECT WALLET LOGIC ---
+        project = get_just_single_project_by_id(db=db, id=wallet.project_id)
+        if not project:
+            return {'status': False, 'message': 'Project not found'}
+            
+        # KoraPay requires a human/business name and email. 
+        # If your 'Project' has its own email/name, use it. Otherwise, fallback to the project creator.
+        project_owner = get_just_single_user_by_id(db=db, id=project.created_by) 
+        owner_profile = get_single_profile_by_user_id(db=db, user_id=project.created_by)
+        
+        if not owner_profile.bvn:
+            return {'status': False, 'message': 'Project owner must add BVN to generate a project account'}
 
+        customer_name = f"{owner_profile.first_name} {owner_profile.last_name}"
+        customer_email = project_owner.email
+        
+        # For NGN Virtual Accounts, Kora usually requires the individual's BVN unless it's a registered business (RC Number)
+        kyc_data['bvn'] = owner_profile.bvn 
+        customer_bvn = owner_profile.bvn 
+
+    else:
+        # Wallet has neither user_id nor project_id (Orphaned wallet)
+        return {'status': False, 'message': 'Invalid wallet ownership structure'}
+
+    # 4. Construct the final Kora Payload
+    customer = {
+        "name": customer_name,
+        "email": customer_email
+    }
+
+    # 5. Call KoraPay API
+    response = create_virtual_bank_account(account_reference=account_reference, account_name=customer_name, customer_full_name=customer_name, customer_email=customer_email, customer_bvn=customer_bvn, permanent=True)
+
+    if not response.get('status'):
         return {
-            'status': True,
-            'message': 'Virtual account generated successfully',
-            'data': {
-                'account_name': va_data.get('account_name'),
-                'account_number': va_data.get('account_number'),
-                'bank_name': va_data.get('bank_name')
-            }
+            'status': False,
+            'message': response.get('message', 'Failed to create virtual account'),
+            'data': response.get('data')
         }
-    except Exception as err:
-        # return {
-        #     'status': False,
-        #     'message': f"Failed: {err}",
-        #     'data': None,
-        # }
-        raise
+
+    va_data = response.get('data', {})
+
+    # 6. Update the wallet with the new Virtual Account details
+    # commit=False keeps it in the active session for get_db() to commit at the end of the request
+    update_wallet(
+        db=db, 
+        id=wallet.id, 
+        values={
+            'account_name': va_data.get('account_name'),
+            'account_number': va_data.get('account_number'),
+            'bank_name': va_data.get('bank_name'),
+            'bank_code': va_data.get('bank_code'),
+            'external_reference': account_reference,
+            'is_generated': 1
+        },
+        commit=False 
+    )
+
+    return {
+        'status': True,
+        'message': 'Virtual account generated successfully',
+        'data': {
+            'account_name': va_data.get('account_name'),
+            'account_number': va_data.get('account_number'),
+            'bank_name': va_data.get('bank_name')
+        }
+    }
 
 def transfer_funds_to_project_wallet(db: Session, user_id: int, project_id: int, amount: float, narration: str = None):
     """
