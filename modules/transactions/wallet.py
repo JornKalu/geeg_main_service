@@ -276,6 +276,7 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
     # 2. Initialize our KoraPay payload variables
     customer_name = ""
     customer_email = ""
+    customer_bvn = ""
     kyc_data = {}
     
     # Using the wallet ID ensures this reference is universally unique to the ledger
@@ -296,6 +297,7 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
         customer_name = f"{profile.first_name} {profile.last_name}"
         customer_email = user.email
         kyc_data['bvn'] = profile.bvn
+        customer_bvn = profile.bvn
         if profile.nin:
             kyc_data['nin'] = profile.nin
 
@@ -318,6 +320,7 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
         
         # For NGN Virtual Accounts, Kora usually requires the individual's BVN unless it's a registered business (RC Number)
         kyc_data['bvn'] = owner_profile.bvn 
+        customer_bvn = owner_profile.bvn 
 
     else:
         # Wallet has neither user_id nor project_id (Orphaned wallet)
@@ -330,15 +333,7 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
     }
 
     # 5. Call KoraPay API
-    response = create_virtual_bank_account(
-        account_reference=account_reference,
-        account_name=customer_name,
-        bank_code=None,  
-        customer=customer,
-        kyc=kyc_data,
-        permanent=True,
-        currency="NGN"
-    )
+    response = create_virtual_bank_account(account_reference=account_reference, account_name=customer_name, customer_full_name=customer_name, customer_email=customer_email, customer_bvn=customer_bvn, permanent=True)
 
     if not response.get('status'):
         return {
