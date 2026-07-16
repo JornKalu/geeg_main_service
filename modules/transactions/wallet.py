@@ -328,13 +328,6 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
             'data': None,
             }
     
-    if customer_bvn is None:
-        return {
-            'status': False,
-            'message': 'Empty BVN, kindly update BVN',
-            'data': None,
-        }
-
 
     # 4. Call KoraPay API
     response = create_virtual_bank_account(account_reference=account_reference, account_name=customer_name, customer_full_name=customer_name, customer_email=customer_email, customer_bvn=customer_bvn, customer_nin=customer_nin, permanent=True)
