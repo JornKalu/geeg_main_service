@@ -128,10 +128,10 @@ class KoraBankListResponse(BaseModel):
         orm_mode = True
 
 class KoraResolveAccountData(BaseModel):
-    account_number: str
-    account_name: str
-    bank_code: str
-    bank_name: str
+    account_number: Optional[str] = None
+    account_name: Optional[str] = None
+    bank_code: Optional[str] = None
+    bank_name: Optional[str] = None
 
 class KoraResolveAccountResponse(BaseModel):
     status: bool

@@ -24,7 +24,7 @@ async def list_banks(request: Request, user=Depends(auth.auth_wrapper), db: Sess
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.get('message'))
     return result.get('data')
 
-@router.post("/external_banks/resolve")
+@router.post("/external_banks/resolve", response_model=KoraResolveAccountResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def resolve_account(request: Request, fields: ResolveBankAccountRequest, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
     """
     Verify bank account details using KoraPay.
