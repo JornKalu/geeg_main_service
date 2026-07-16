@@ -112,6 +112,7 @@ def make_bank_account_default(db: Session, id: int, user_id: int):
         'status': True,
         'message': 'Default bank account set successfully',
     }
+
 def process_external_bank_transfer(
     db: Session, 
     user_id: int, 
@@ -167,7 +168,7 @@ def process_external_bank_transfer(
             'narration': narration if narration else f"Withdrawal to {bank_account.bank_name} ({bank_account.account_number})",
             'from_wallet_previous_balance': current_balance,
             'from_wallet_new_balance': new_balance,
-            'status': 'pending',
+            'status': 0,
             'external_account_name': bank_account.account_name,
             'external_account_number': bank_account.account_number,
             'external_bank_name': bank_account.bank_name
@@ -222,7 +223,7 @@ def process_external_bank_transfer(
         update_transaction(
             db, 
             id=transaction.id, 
-            values={'status': 'failed', 'meta_data': payout_response}
+            values={'status': 2, 'meta_data': payout_response}
         )
 
         return {

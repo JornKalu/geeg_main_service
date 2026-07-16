@@ -137,7 +137,7 @@ def handle_virtual_account_payment(db: Session, payment_data: Dict) -> Dict:
             'from_wallet_new_balance': None,
             'to_wallet_previous_balance': prev_balance,
             'to_wallet_new_balance': new_balance,
-            'status': 'completed',
+            'status': 1,
             'provider': 'korapay',
             'external_reference': korapay_reference,
             'external_account_name': account_name,
