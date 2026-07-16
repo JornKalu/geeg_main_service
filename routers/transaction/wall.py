@@ -71,7 +71,7 @@ async def bulk_project_wallet_to_wallet_transfer(payload: BulkProjectWalletTrans
     return result
     
 
-@router.post("/generate-virtual-account", response_model=GenerateVirtualAccountResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+@router.post("/generate-virtual-account")
 async def create_virtual_account(payload: GenerateVirtualAccountRequest, user=Depends(auth.auth_wrapper), db: Session = Depends(get_session)):
     """
     Endpoint to generate a KoraPay virtual account for a user.
