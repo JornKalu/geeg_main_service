@@ -30,6 +30,7 @@ def load_env_config():
         'korapay_secret_key': os.getenv('KORAPAY_SECRET_KEY'),
         'korapay_public_key': os.getenv('KORAPAY_PUBLIC_KEY'),
         'korapay_url': os.getenv('KORAPAY_URL', 'https://api.korapay.com/merchant/api/v1'),
+        'korapay_virtual_account_bank_code': os.getenv('KORAPAY_VIRTUAL_ACCOUNT_BANK_CODE'),
         'google_client_id': os.getenv('GOOGLE_CLIENT_ID'),
         'google_client_secret': os.getenv('GOOGLE_CLIENT_SECRET'),
         'facebook_client_id': os.getenv('FACEBOOK_CLIENT_ID'),

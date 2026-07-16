@@ -4,12 +4,17 @@ from modules.external.api import send_external_request
 
 config = load_env_config()
 
-def get_korapay_headers() -> Dict:
+def get_korapay_headers(is_public: bool=False) -> Dict:
     """
     Returns the standard headers for KoraPay API requests.
     """
+    key = None
+    if is_public == False:
+        key = config['korapay_secret_key']
+    else:
+        key = config['korapay_public_key']
     return {
-        "Authorization": f"Bearer {config['korapay_secret_key']}",
+        "Authorization": f"Bearer {key}",
         "Content-Type": "application/json",
         "Accept": "application/json"
     }
@@ -47,15 +52,7 @@ def get_balances():
     url = f"{config['korapay_url']}/balances"
     return send_external_request(url=url, headers=get_korapay_headers(), type=1)
 
-def create_virtual_bank_account(
-    account_reference: str, 
-    account_name: str, 
-    bank_code: str,
-    customer: Dict, 
-    kyc: Dict,
-    permanent: bool = True, 
-    currency: str = "NGN",
-):
+def create_virtual_bank_account(account_reference: str, account_name: str, customer_full_name: str, customer_email: str, customer_bvn: str, permanent: bool = True):
     """
     Create a Virtual Bank Account for a customer.
     Reference: https://developers.korapay.com/reference/create-a-virtual-bank-account
@@ -64,26 +61,19 @@ def create_virtual_bank_account(
     data = {
         "account_reference": account_reference,
         "account_name": account_name,
-        "customer": customer,
+        "bank_code": config['korapay_virtual_account_bank_code'],
         "permanent": permanent,
-        "currency": currency
+        "customer": {
+            "name": customer_full_name,
+            "email": customer_email,
+        },
+        "kyc": {
+            "bvn": customer_bvn,
+        }
     }
-    if bank_code:
-        data["bank_code"] = bank_code
-    if kyc:
-        data["kyc"] = kyc
-
     return send_external_request(url=url, headers=get_korapay_headers(), data=data, type=2)
 
-def payout_bank_transfer(
-    amount: float, 
-    reference: str, 
-    bank_code: str, 
-    account_number: str, 
-    customer_email: str,         
-    customer_name: str = None,   
-    narration: str = ""
-):
+def payout_bank_transfer(amount: float, reference: str, bank_code: str, account_number: str, customer_email: str, customer_name: str = None, narration: str = ""):
     """
     Initiate a payout to a bank account.
     Reference: https://developers.korapay.com/docs/payout-via-api
@@ -115,7 +105,7 @@ def get_bank_list():
     Retrieve a list of supported banks for payouts.
     """
     url = f"{config['korapay_url']}/misc/banks?currency=NGN"
-    return send_external_request(url=url, headers=get_korapay_headers(), type=1)
+    return send_external_request(url=url, headers=get_korapay_headers(is_public=True), type=1)
 
 def resolve_bank_account(bank_code: str, account_number: str):
     """
