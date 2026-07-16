@@ -113,7 +113,7 @@ def resolve_bank_account(bank_code: str, account_number: str):
     """
     url = f"{config['korapay_url']}/misc/banks/resolve"
     data = {
-        "bank_code": bank_code,
-        "account_number": account_number
+        "bank": bank_code,
+        "account": account_number
     }
     return send_external_request(url=url, headers=get_korapay_headers(), data=data, type=2)
