@@ -52,12 +52,17 @@ def get_balances():
     url = f"{config['korapay_url']}/balances"
     return send_external_request(url=url, headers=get_korapay_headers(), type=1)
 
-def create_virtual_bank_account(account_reference: str, account_name: str, customer_full_name: str, customer_email: str, customer_bvn: str, permanent: bool = True):
+def create_virtual_bank_account(account_reference: str, account_name: str, customer_full_name: str, customer_email: str, customer_bvn: str, customer_nin: str = None, permanent: bool = True):
     """
     Create a Virtual Bank Account for a customer.
     Reference: https://developers.korapay.com/reference/create-a-virtual-bank-account
     """
     url = f"{config['korapay_url']}/virtual-bank-account"
+    kyc = {
+        "bvn": customer_bvn,
+    }
+    if customer_nin is not None:
+        kyc["nin"] = customer_nin
     data = {
         "account_reference": account_reference,
         "account_name": account_name,
@@ -67,9 +72,7 @@ def create_virtual_bank_account(account_reference: str, account_name: str, custo
             "name": customer_full_name,
             "email": customer_email,
         },
-        "kyc": {
-            "bvn": customer_bvn,
-        }
+        "kyc": kyc,
     }
     return send_external_request(url=url, headers=get_korapay_headers(), data=data, type=2)
 

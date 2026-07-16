@@ -276,8 +276,8 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
     # 2. Initialize our KoraPay payload variables
     customer_name = ""
     customer_email = ""
-    customer_bvn = ""
-    kyc_data = {}
+    customer_bvn = None
+    customer_nin = None
     
     # Using the wallet ID ensures this reference is universally unique to the ledger
     account_reference = f"VA_WLT_{wallet.id}"
@@ -296,10 +296,9 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
 
         customer_name = f"{profile.first_name} {profile.last_name}"
         customer_email = user.email
-        kyc_data['bvn'] = profile.bvn
         customer_bvn = profile.bvn
         if profile.nin:
-            kyc_data['nin'] = profile.nin
+            customer_nin = profile.nin
 
     elif wallet.project_id:
         # --- PROJECT WALLET LOGIC ---
@@ -319,21 +318,26 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
         customer_email = project_owner.email
         
         # For NGN Virtual Accounts, Kora usually requires the individual's BVN unless it's a registered business (RC Number)
-        kyc_data['bvn'] = owner_profile.bvn 
         customer_bvn = owner_profile.bvn 
 
     else:
         # Wallet has neither user_id nor project_id (Orphaned wallet)
-        return {'status': False, 'message': 'Invalid wallet ownership structure'}
+        return {
+            'status': False, 
+            'message': 'Invalid wallet ownership structure',
+            'data': None,
+            }
+    
+    if customer_bvn is None:
+        return {
+            'status': False,
+            'message': 'Empty BVN, kindly update BVN',
+            'data': None,
+        }
 
-    # 4. Construct the final Kora Payload
-    customer = {
-        "name": customer_name,
-        "email": customer_email
-    }
 
-    # 5. Call KoraPay API
-    response = create_virtual_bank_account(account_reference=account_reference, account_name=customer_name, customer_full_name=customer_name, customer_email=customer_email, customer_bvn=customer_bvn, permanent=True)
+    # 4. Call KoraPay API
+    response = create_virtual_bank_account(account_reference=account_reference, account_name=customer_name, customer_full_name=customer_name, customer_email=customer_email, customer_bvn=customer_bvn, customer_nin=customer_nin, permanent=True)
 
     if not response.get('status'):
         return {
@@ -344,8 +348,7 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
 
     va_data = response.get('data', {})
 
-    # 6. Update the wallet with the new Virtual Account details
-    # commit=False keeps it in the active session for get_db() to commit at the end of the request
+    # 5. Update the wallet with the new Virtual Account details
     update_wallet(
         db=db, 
         id=wallet.id, 
@@ -356,8 +359,7 @@ def generate_virtual_account_number(db: Session, wallet_id: int):
             'bank_code': va_data.get('bank_code'),
             'external_reference': account_reference,
             'is_generated': 1
-        },
-        commit=False 
+        }
     )
 
     return {
