@@ -19,28 +19,6 @@ def get_korapay_headers(is_public: bool=False) -> Dict:
         "Accept": "application/json"
     }
 
-def send_korapay_requests(url, data: Dict={}, is_public: bool=False, type: int=1):
-    resp = send_external_request(url=url, headers=get_korapay_headers(is_public=is_public), data=data, type=type)
-    if resp['status'] == False:
-        return {
-            'status': False,
-            'message': resp['message'],
-            'data': None
-        }
-    else:
-        if resp['status_code'] != 200 or resp['status_code'] != 201:
-            return {
-                'status': False,
-                'message': f'Request failed: {resp['status_code']}',
-                'data': resp['data']
-            }
-        else:
-            return {
-                'status': True,
-                'message': 'Success',
-                'data': resp['data'],
-            }
-
 def initialize_payment(amount: float, redirect_url: str, reference: str, customer: Dict, description: str = "Payment"):
     """
     Initialize a payment (Checkout).
@@ -56,7 +34,7 @@ def initialize_payment(amount: float, redirect_url: str, reference: str, custome
         "description": description,
         "channels": ["card", "bank_transfer", "pay_with_bank"]
     }
-    return send_korapay_requests(url=url, data=data, type=2)
+    return send_external_request(url=url, headers=get_korapay_headers(), data=data, type=2)
 
 def verify_transaction(reference: str):
     """
@@ -64,7 +42,7 @@ def verify_transaction(reference: str):
     Reference: https://developers.korapay.com/reference/verify-transaction
     """
     url = f"{config['korapay_url']}/transactions/verify/{reference}"
-    return send_korapay_requests(url=url, type=1)
+    return send_external_request(url=url, headers=get_korapay_headers(), type=1)
 
 def get_balances():
     """
@@ -72,7 +50,7 @@ def get_balances():
     Reference: https://developers.korapay.com/reference/fetch-balances
     """
     url = f"{config['korapay_url']}/balances"
-    return send_korapay_requests(url=url, type=1)
+    return send_external_request(url=url, headers=get_korapay_headers(), type=1)
 
 def create_virtual_bank_account(account_reference: str, account_name: str, customer_full_name: str, customer_email: str, customer_bvn: str, customer_nin: str = None, permanent: bool = True):
     """
@@ -96,7 +74,7 @@ def create_virtual_bank_account(account_reference: str, account_name: str, custo
         },
         "kyc": kyc,
     }
-    return send_korapay_requests(url=url, data=data, type=2)
+    return send_external_request(url=url, headers=get_korapay_headers(), data=data, type=2)
 
 def payout_bank_transfer(amount: float, reference: str, bank_code: str, account_number: str, customer_email: str, customer_name: str = None, narration: str = ""):
     """
@@ -123,14 +101,14 @@ def payout_bank_transfer(amount: float, reference: str, bank_code: str, account_
             "customer": customer_payload
         }
     }
-    return send_korapay_requests(url=url, data=data, type=2)
+    return send_external_request(url=url, headers=get_korapay_headers(), data=data, type=2)
 
 def get_bank_list():
     """
     Retrieve a list of supported banks for payouts.
     """
     url = f"{config['korapay_url']}/misc/banks?currency=NGN"
-    return send_korapay_requests(url=url, is_public=True, type=1)
+    return send_external_request(url=url, headers=get_korapay_headers(is_public=True), type=1)
 
 def resolve_bank_account(bank_code: str, account_number: str):
     """
@@ -141,4 +119,4 @@ def resolve_bank_account(bank_code: str, account_number: str):
         "bank": bank_code,
         "account": account_number
     }
-    return send_korapay_requests(url=url, data=data, type=2)
+    return send_external_request(url=url, headers=get_korapay_headers(), data=data, type=2)
