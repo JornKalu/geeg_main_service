@@ -29,12 +29,12 @@ class TransactionModel(BaseModel):
     invoice_id: Optional[int] = None
     bank_account_id: Optional[int] = None
     provider: Optional[str] = None
-    transaction_type: str
-    reference: str
+    transaction_type: Optional[str] = None
+    reference: Optional[str] = None
     external_reference: Optional[str] = None
-    amount: Decimal
+    amount: Optional[Decimal] = None
     fee: Optional[Decimal] = None
-    total_amount: Decimal
+    total_amount: Optional[Decimal] = None
     narration: Optional[str] = None
     external_account_name: Optional[str] = None
     external_account_number: Optional[str] = None
@@ -43,11 +43,9 @@ class TransactionModel(BaseModel):
     from_wallet_new_balance: Optional[Decimal] = None
     to_wallet_previous_balance: Optional[Decimal] = None
     to_wallet_new_balance: Optional[Decimal] = None
-    status: str
-    meta_data: Optional[dict] = None
+    status: Optional[int] = None
+    # meta_data: Optional[dict] = None
     created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    deleted_at: Optional[datetime] = None
 
     class Config:
         orm_mode = True

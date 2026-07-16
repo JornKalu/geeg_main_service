@@ -84,7 +84,7 @@ async def set_default(request: Request, id: int, user=Depends(auth.auth_wrapper)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.get('message'))
     return result
 
-@router.post("/external_banks/withdraw")
+@router.post("/external_banks/withdraw", response_model=WithdrawalResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def withdraw_funds(request: Request, fields: WithdrawalRequest, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
     """
     Initiate a withdrawal from user wallet to an external bank account.

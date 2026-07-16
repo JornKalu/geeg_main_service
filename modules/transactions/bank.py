@@ -2,7 +2,7 @@ from typing import Dict, List
 from decimal import Decimal
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from database.model import create_bank_account, update_bank_account, delete_bank_account, force_delete_bank_account, get_bank_accounts, get_single_bank_account_by_id, set_default_bank_account, get_just_single_bank_account_by_id, get_wallet_by_user_id, update_wallet, create_transaction, update_transaction
+from database.model import create_bank_account, update_bank_account, delete_bank_account, force_delete_bank_account, get_bank_accounts, get_single_bank_account_by_id, set_default_bank_account, get_just_single_bank_account_by_id, get_wallet_by_user_id, update_wallet, create_transaction, update_transaction, get_single_transaction_by_id
 from modules.utils.tools import process_schema_dictionary, generate_transaction_reference
 from fastapi_pagination.ext.sqlalchemy import paginate
 from modules.external.korapay import payout_bank_transfer
@@ -246,5 +246,5 @@ def process_external_bank_transfer(
     return {
         'status': True,
         'message': 'Success',
-        'data': transaction
+        'data': get_single_transaction_by_id(db=db, id=transaction.id)
     }
