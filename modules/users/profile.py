@@ -11,7 +11,7 @@ import json
 
 auth = AuthHandler()
 
-def update_user_profile_details(db: Session, avatar: UploadFile, banner: UploadFile, user_id: int=0, industry_id: int = None, category_id: int = None, first_name: str = None, other_name: str = None, last_name: str = None, gender: str = None, date_of_birth: str = None, location: str = None, bio: str = None):
+def update_user_profile_details(db: Session, avatar: UploadFile, banner: UploadFile, user_id: int=0, industry_id: int = None, category_id: int = None, first_name: str = None, other_name: str = None, last_name: str = None, gender: str = None, date_of_birth: str = None, location: str = None, bio: str = None, bvn: str = None, nin: str = None):
 	pro_values = {}
 	if avatar is not None:
 		aupload = upload_request_file_to_cloudinary(file=avatar)
@@ -51,6 +51,10 @@ def update_user_profile_details(db: Session, avatar: UploadFile, banner: UploadF
 		pro_values['location'] = location
 	if bio is not None:
 		pro_values['bio'] = bio
+	if bvn is not None:
+		pro_values['bvn'] = bvn
+	if nin is not None:
+		pro_values['nin'] = nin
 	update_profile_by_user_id(db=db, user_id=user_id, values=pro_values)
 	return {
 		'status': True,
