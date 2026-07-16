@@ -21,7 +21,6 @@ def update_user_profile_details(db: Session, avatar: UploadFile, banner: UploadF
 			return {
 			    'status': False,
 			    'message': aupload['message'],
-			    'data': None
 			}
 	if banner is not None:
 		bupload = upload_request_file_to_cloudinary(file=banner)
@@ -31,7 +30,6 @@ def update_user_profile_details(db: Session, avatar: UploadFile, banner: UploadF
 			return {
 			    'status': False,
 			    'message': bupload['message'],
-			    'data': None
 			}
 	if industry_id is not None:
 		pro_values['industry_id'] = industry_id
@@ -52,7 +50,13 @@ def update_user_profile_details(db: Session, avatar: UploadFile, banner: UploadF
 	if bio is not None:
 		pro_values['bio'] = bio
 	if bvn is not None:
-		pro_values['bvn'] = bvn
+		if len(bvn) != 11:
+			return {
+				'status': False,
+				'message': 'BVN must be 11 characters long',
+			}
+		else:
+			pro_values['bvn'] = bvn
 	if nin is not None:
 		pro_values['nin'] = nin
 	update_profile_by_user_id(db=db, user_id=user_id, values=pro_values)

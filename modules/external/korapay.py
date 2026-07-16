@@ -31,7 +31,7 @@ def send_korapay_requests(url, data: Dict={}, is_public: bool=False, type: int=1
         if resp['status_code'] != 200 or resp['status_code'] != 201:
             return {
                 'status': False,
-                'message': 'Request failed',
+                'message': f'Request failed: {resp['status_code']}',
                 'data': resp['data']
             }
         else:
