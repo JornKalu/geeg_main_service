@@ -110,11 +110,14 @@ class BankAccountModel(BaseModel):
         orm_mode = True
 
 class KoraBankItem(BaseModel):
-    name: str
-    slug: str
-    code: str
-    ussd: Optional[str] = None
-    logo: Optional[str] = None
+    name: Optional[str] = None
+    slug: Optional[str] = None
+    code: Optional[str] = None
+    country: Optional[str] = None
+    nibss_bank_code: Optional[str] = None
+
+    class Config:
+        orm_mode = True
 
 class KoraBankListResponse(BaseModel):
     status: bool
