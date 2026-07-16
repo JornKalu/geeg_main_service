@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.get("/external_banks")
+@router.get("/external_banks", response_model=KoraBankListResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def list_banks(request: Request, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db)):
     """
     Retrieve a list of supported banks for payouts from KoraPay.
