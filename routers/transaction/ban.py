@@ -61,7 +61,7 @@ async def delete(request: Request, id: int, user=Depends(auth.auth_wrapper), db:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.get('message'))
     return result
 
-@router.get("/")
+@router.get("/", response_model=Page[BankAccountModel], responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def get_all(request: Request, user=Depends(auth.auth_wrapper), db: Session = Depends(get_db), bank_name: str = Query(None), bank_code: str = Query(None)):
     filters = {}
     if bank_name:
