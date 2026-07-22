@@ -106,6 +106,8 @@ def get_single_transaction_by_id(db: Session, id: int = 0):
 def get_transaction_by_reference(db: Session, reference: str):
     return db.query(Transaction).filter_by(reference=reference, deleted_at=None).first()
 
+def get_transaction_by_external_reference(db: Session, external_reference: str):
+    return db.query(Transaction).filter_by(external_reference=external_reference, deleted_at=None).first()
 
 def get_user_transaction_history(db: Session, user_id: int):
     """

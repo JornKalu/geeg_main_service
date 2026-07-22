@@ -47,6 +47,8 @@ class WalletModel(BaseModel):
     account_number: Optional[str] = None
     bank_name: Optional[str] = None
     bank_code: Optional[str] = None
+    is_generated: Optional[int] = 0
+    status: Optional[int] = 0
     # currency: Optional[WalletCurrencyModel] = None
     
     class Config:
