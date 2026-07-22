@@ -65,7 +65,7 @@ def retrieve_bank_accounts(db: Session, user_id: int, filters: Dict = {}):
     """
     Retrieves all bank accounts for a given user.
     """
-    # filters['user_id'] = user_id
+    filters['user_id'] = user_id
     data = get_bank_accounts(db=db, filters=filters)
     return paginate(data)
 
