@@ -107,7 +107,7 @@ def make_bank_account_default(db: Session, id: int, user_id: int):
             'status': False,
             'message': 'You are not authorized to set this bank account as default',
         }
-    set_default_bank_account(db=db, user_id=user_id, bank_account_id=id)
+    set_default_bank_account(db=db, user_id=user_id, account_id=id)
     return {
         'status': True,
         'message': 'Default bank account set successfully',
