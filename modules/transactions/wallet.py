@@ -178,7 +178,7 @@ def process_bulk_project_wallet_to_wallet_transfer(db: Session, project_id: int,
     """
     results = []
     
-    sender_wallet = get_wallet_by_project_id(db, user_id=project_id)
+    sender_wallet = get_wallet_by_project_id(db, project_id=project_id)
     if not sender_wallet:
         return {'status': False, 'message': f'Sender wallet not found for project: {project_id}', 'data': None}
 
