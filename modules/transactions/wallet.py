@@ -53,7 +53,7 @@ def process_wallet_to_wallet_transfer(db: Session, from_user_id: int, to_user_id
         'from_wallet_new_balance': from_new_bal,
         'to_wallet_previous_balance': to_prev_bal,
         'to_wallet_new_balance': to_new_bal,
-        'status': 'completed'
+        'status': 1
     }
 
     transaction = create_transaction(
@@ -150,7 +150,7 @@ def process_bulk_wallet_to_wallet_transfer(db: Session, from_user_id: int, trans
                 'from_wallet_new_balance': from_new_bal,
                 'to_wallet_previous_balance': to_prev_bal,
                 'to_wallet_new_balance': to_new_bal,
-                'status': 'completed'
+                'status': 1
             }
 
             transaction = create_transaction(
@@ -244,7 +244,7 @@ def process_bulk_project_wallet_to_wallet_transfer(db: Session, project_id: int,
                 'from_wallet_new_balance': from_new_bal,
                 'to_wallet_previous_balance': to_prev_bal,
                 'to_wallet_new_balance': to_new_bal,
-                'status': 'completed'
+                'status': 1
             }
 
             transaction = create_transaction(
@@ -426,7 +426,7 @@ def transfer_funds_to_project_wallet(db: Session, user_id: int, project_id: int,
         'from_wallet_new_balance': user_new_bal,
         'to_wallet_previous_balance': project_prev_bal,
         'to_wallet_new_balance': project_new_bal,
-        'status': 'completed'
+        'status': 1
     }
 
     transaction = create_transaction(
@@ -494,7 +494,7 @@ def transfer_funds_from_project_wallet(db: Session, user_id: int, project_id: in
         'from_wallet_new_balance': project_new_bal,
         'to_wallet_previous_balance': user_prev_bal,
         'to_wallet_new_balance': user_new_bal,
-        'status': 'completed'
+        'status': 1
     }
 
     transaction = create_transaction(
