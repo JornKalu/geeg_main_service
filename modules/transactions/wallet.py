@@ -187,7 +187,12 @@ def process_bulk_project_wallet_to_wallet_transfer(db: Session, project_id: int,
         return {'status': False, 'message': 'Insufficient total balance in sender wallet for all transfers', 'data': None}
 
     receiver_ids = [t['to_user_id'] for t in transfers]
-    receiver_wallets = {w.user_id: w for w in db.query(get_wallet_by_user_id(db, user_id=uid) for uid in receiver_ids if get_wallet_by_user_id(db, user_id=uid) is not None)}
+    # receiver_wallets = {w.user_id: w for w in db.query(get_wallet_by_user_id(db, user_id=uid) for uid in receiver_ids if get_wallet_by_user_id(db, user_id=uid) is not None)}
+    receiver_wallets = {}
+    for uid in receiver_ids:
+        wallet = get_wallet_by_user_id(db, user_id=uid)
+        if wallet is not None:
+            receiver_wallets[uid] = wallet
 
     try:
         current_sender_balance = float(sender_wallet.balance)
