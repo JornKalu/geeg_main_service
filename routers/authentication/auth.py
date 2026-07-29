@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Request, Depends, HTTPException
 from database.db import get_session, get_db
 from sqlalchemy.orm import Session
-from modules.authentication.auth import auth, register_user, login_with_email, get_user_details, update_user_pin, verify_user_pin, check_if_email_exists, finalise_passwordless_login, send_email_token, send_user_email_token, verify_email_token, email_token_just_verify, authenticate_social_user
-from database.schema import ErrorResponse, PlainResponse, PlainCodeResponse, PlainResponseData, RegisterRequest, LoginEmailRequest, UserPinModel, MainAuthResponseModel, MainUserDetailsResponseModel, CheckUserResponseModel, CheckEmailRequest, FinalisePasswordLessRequest, SendEmailTokenRequest, VerifyEmailTokenRequest, SocialAuthRequest
+from modules.authentication.auth import auth, register_user, login_with_email, get_user_details, update_user_pin, verify_user_pin, check_if_email_exists, check_if_username_exists, finalise_passwordless_login, send_email_token, send_user_email_token, verify_email_token, email_token_just_verify, authenticate_social_user
+from database.schema import ErrorResponse, PlainResponse, PlainCodeResponse, PlainResponseData, RegisterRequest, LoginEmailRequest, UserPinModel, MainAuthResponseModel, MainUserDetailsResponseModel, CheckUserResponseModel, CheckEmailRequest, CheckUsernameRequest, FinalisePasswordLessRequest, SendEmailTokenRequest, VerifyEmailTokenRequest, SocialAuthRequest
 
 router = APIRouter(
     prefix="/auth",
@@ -56,6 +56,11 @@ async def details(request: Request, user=Depends(auth.auth_wrapper), db: Session
 @router.post("/check_email", response_model=CheckUserResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def check_email(request: Request, fields: CheckEmailRequest, db: Session = Depends(get_db)):
     req = check_if_email_exists(db=db, email=fields.email)
+    return req
+
+@router.post("/check_username", response_model=CheckUserResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+async def check_username(request: Request, fields: CheckUsernameRequest, db: Session = Depends(get_db)):
+    req = check_if_username_exists(db=db, username=fields.username)
     return req
 
 @router.post("/update_pin", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})

@@ -47,6 +47,12 @@ class CheckEmailRequest(BaseModel):
     class Config:
         orm_mode = True
 
+class CheckUsernameRequest(BaseModel):
+    username: str
+    
+    class Config:
+        orm_mode = True
+
 class UserPinModel(BaseModel):
     pin: str
     
