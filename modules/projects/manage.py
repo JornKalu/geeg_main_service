@@ -17,10 +17,10 @@ def insert_new_project(db: Session, currency_id: int, name: str, start_date: str
 	end_date = process_date_string(date_str=end_date)
 	total_role_fee = extract_roles_total_fee(roles=roles)
 	if total_role_fee > 0:
-		if total_fee != total_role_fee:
+		if total_fee < total_role_fee:
 			return {
 				'status': False,
-				'message': f"Total project fee '{total_fee}' is not equal to total role fee '{total_role_fee}'",
+				'message': f"Total project fee '{total_fee}' can not be lower than total role fee '{total_role_fee}'",
 				'data': None,
 			}
 	project = create_project(db=db, currency_id=currency_id, name=name, start_date=start_date, end_date=end_date, created_by=created_by, total_fee=total_fee, description=description, status=1)
