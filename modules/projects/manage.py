@@ -137,7 +137,9 @@ def insert_multiple_new_role(db: Session, user_id: int, project_id: int, roles: 
 		}
 		else:
 			extracted_fee = extract_roles_total_fee(roles=roles)
+			extracted_fee = float(extracted_fee)
 			roles_total_fee = get_roles_fee_sum(db=db, filters={'project_id': project_id, 'status': 1})
+			roles_total_fee = float(roles_total_fee)
 			roles_total_fee = roles_total_fee + extracted_fee
 			if project.total_fee < roles_total_fee:
 				return {
