@@ -1,7 +1,7 @@
 from typing import Dict
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
-from database.model import update_profile_by_user_id, get_single_user_by_id, get_users
+from database.model import update_profile_by_user_id, get_single_user_by_id, get_users, update_user, get_single_user_by_username
 from modules.utils.tools import process_schema_dictionary, process_date_string_to_laravel
 from modules.utils.net import process_phone_number
 from modules.utils.files import upload_request_file_to_cloudinary
@@ -11,8 +11,9 @@ import json
 
 auth = AuthHandler()
 
-def update_user_profile_details(db: Session, avatar: UploadFile, banner: UploadFile, user_id: int=0, industry_id: int = None, category_id: int = None, first_name: str = None, other_name: str = None, last_name: str = None, gender: str = None, date_of_birth: str = None, location: str = None, bio: str = None, bvn: str = None, nin: str = None):
+def update_user_profile_details(db: Session, avatar: UploadFile, banner: UploadFile, user_id: int=0, industry_id: int = None, category_id: int = None, username: str = None, first_name: str = None, other_name: str = None, last_name: str = None, gender: str = None, date_of_birth: str = None, location: str = None, bio: str = None, bvn: str = None, nin: str = None):
 	pro_values = {}
+	user_values = {}
 	if avatar is not None:
 		aupload = upload_request_file_to_cloudinary(file=avatar)
 		if aupload['status'] == True:
@@ -35,6 +36,15 @@ def update_user_profile_details(db: Session, avatar: UploadFile, banner: UploadF
 		pro_values['industry_id'] = industry_id
 	if category_id is not None:
 		pro_values['category_id'] = category_id
+	if username is not None:
+		username_check = get_single_user_by_username(db=db, username=username)
+		if username_check is not None:
+			return {
+				'status': False,
+				'message': 'Username already exists',
+			}
+		else:
+			user_values['username'] = username
 	if first_name is not None:
 		pro_values['first_name'] = first_name
 	if other_name is not None:
@@ -59,7 +69,10 @@ def update_user_profile_details(db: Session, avatar: UploadFile, banner: UploadF
 			pro_values['bvn'] = bvn
 	if nin is not None:
 		pro_values['nin'] = nin
-	update_profile_by_user_id(db=db, user_id=user_id, values=pro_values)
+	if user_values != {}:
+		update_user(db=db, id=user_id, values=user_values)
+	if pro_values != {}:
+		update_profile_by_user_id(db=db, user_id=user_id, values=pro_values)
 	return {
 		'status': True,
 		'message': 'Success',
