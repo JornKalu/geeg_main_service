@@ -41,6 +41,14 @@ class VerifyEmailTokenRequest(BaseModel):
     class Config:
         orm_mode = True
 
+class VerifyEmailPasswordTokenRequest(BaseModel):
+    email: EmailStr
+    token_str: str
+    password: str
+    
+    class Config:
+        orm_mode = True
+
 class CheckEmailRequest(BaseModel):
     email: EmailStr
     

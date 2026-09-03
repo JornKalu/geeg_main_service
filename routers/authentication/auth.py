@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Request, Depends, HTTPException
 from database.db import get_session, get_db
 from sqlalchemy.orm import Session
-from modules.authentication.auth import auth, register_user, login_with_email, get_user_details, update_user_pin, verify_user_pin, check_if_email_exists, check_if_username_exists, finalise_passwordless_login, send_email_token, send_user_email_token, verify_email_token, email_token_just_verify, authenticate_social_user
-from database.schema import ErrorResponse, PlainResponse, PlainCodeResponse, PlainResponseData, RegisterRequest, LoginEmailRequest, UserPinModel, MainAuthResponseModel, MainUserDetailsResponseModel, CheckUserResponseModel, CheckEmailRequest, CheckUsernameRequest, FinalisePasswordLessRequest, SendEmailTokenRequest, VerifyEmailTokenRequest, SocialAuthRequest
+from modules.authentication.auth import auth, register_user, login_with_email, get_user_details, update_user_pin, verify_user_pin, check_if_email_exists, check_if_username_exists, finalise_passwordless_login, send_email_token, send_user_email_token, verify_email_token, email_token_just_verify, authenticate_social_user, verify_email_password_token
+from database.schema import ErrorResponse, PlainResponse, PlainCodeResponse, PlainResponseData, RegisterRequest, LoginEmailRequest, UserPinModel, MainAuthResponseModel, MainUserDetailsResponseModel, CheckUserResponseModel, CheckEmailRequest, CheckUsernameRequest, FinalisePasswordLessRequest, SendEmailTokenRequest, VerifyEmailTokenRequest, SocialAuthRequest, VerifyEmailPasswordTokenRequest
 
 router = APIRouter(
     prefix="/auth",
@@ -47,6 +47,11 @@ async def verify_token_email(request: Request, fields: VerifyEmailTokenRequest, 
 @router.post("/verify_just_email_token", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
 async def verify_just_email_token(request: Request, fields: VerifyEmailTokenRequest, db: Session = Depends(get_db)):
     req = email_token_just_verify(db=db, email=fields.email, token_str=fields.token_str)
+    return req
+
+@router.post("/verify_token_email_password", response_model=PlainResponse, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})
+async def verify_token_email(request: Request, fields: VerifyEmailPasswordTokenRequest, db: Session = Depends(get_db)):
+    req = verify_email_password_token(db=db, email=fields.email, token_str=fields.token_str, password=fields.password)
     return req
 
 @router.get("/details", response_model=MainUserDetailsResponseModel, responses={404: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}})

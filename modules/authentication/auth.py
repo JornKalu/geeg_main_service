@@ -692,3 +692,45 @@ def email_token_just_verify(db: Session, email: str=None, token_str: str=None):
             'message': 'Success'
         }
 
+def verify_email_password_token(db: Session, email: str=None, token_str: str=None, password: str=None):
+    user = get_single_user_by_email(db=db, email=email)
+    if user is None:
+        return {
+            'status': False,
+            'message': 'Email not correct',
+        }
+    else:
+        token = get_latest_user_token_by_email_and_status(db=db, email=email, token_type="email", status=0)
+        if token is None:
+            return {
+                'status': False,
+                'message': 'User has no pending email token',
+            }
+        else:
+            if token.status != 0:
+                return {
+                    'status': False,
+                    'message': 'Token already used',
+                }
+            if token.token_value != token_str:
+                return {
+                    'status': False,
+                    'message': 'Invalid Token Value',
+                }
+            if check_if_time_as_pass_now(time_str=token.expired_at) == True:
+                update_token(db=db, id=token.id, values={'status': 2})
+                return {
+                    'status': False,
+                    'message': 'Token has expired',
+                }
+            hashed_password = None
+            if password is not None:
+                hashed_password = auth.get_password_hash(password=password)
+            update_user(db=db, id=user.id, values={
+                'password': hashed_password
+            })
+            update_token(db=db, id=token.id, values={'status': 1})
+            return {
+                'status': True,
+                'message': 'Success'
+            }
